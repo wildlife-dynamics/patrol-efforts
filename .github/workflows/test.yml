@@ -140,11 +140,12 @@ jobs:
       - name: Run all workflow test cases
         shell: bash
         env:
-          # Add your GitHub secrets here
-          # They will be available to the workflow
-          ECOSCOPE_WORKFLOWS__CONNECTIONS__EARTHRANGER__MEP_DEV__SERVER: ${{ secrets.ER_SERVER }}
-          ECOSCOPE_WORKFLOWS__CONNECTIONS__EARTHRANGER__MEP_DEV__PASSWORD: ${{ secrets.ER_PASSWORD }}
-          ECOSCOPE_WORKFLOWS__CONNECTIONS__EARTHRANGER__MEP_DEV__USERNAME: ${{ secrets.ER_USERNAME }}
+          # er_asia connection (the er_asia test case is mock_io: false).
+          # Segment must match set_er_connection's env prefix: name.lower()
+          # with no hyphen->underscore, so the data_source name is "er_asia".
+          ECOSCOPE_WORKFLOWS__CONNECTIONS__EARTHRANGER__ER_ASIA__SERVER: ${{ secrets.ER_SERVER }}
+          ECOSCOPE_WORKFLOWS__CONNECTIONS__EARTHRANGER__ER_ASIA__PASSWORD: ${{ secrets.ER_PASSWORD }}
+          ECOSCOPE_WORKFLOWS__CONNECTIONS__EARTHRANGER__ER_ASIA__USERNAME: ${{ secrets.ER_USERNAME }}
         run: |
           chmod +x dev/run-test-cases.sh || true
           pixi run bash dev/run-test-cases.sh --all

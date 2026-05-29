@@ -8,7 +8,7 @@ base:
       description: "Per-ranger patrol and event activity."
     er_client_name:
       data_source:
-        name: "er-asia"
+        name: "er_asia"
     time_range:
       since: "2026-05-01T00:00:00"
       until: "2026-05-06T23:59:59"
@@ -38,7 +38,7 @@ er_asia:
       description: "Per-ranger patrol and event activity."
     er_client_name:
       data_source:
-        name: "er-asia"
+        name: "er_asia"
     time_range:
       since: "2026-05-01T00:00:00"
       until: "2026-05-06T23:59:59"
