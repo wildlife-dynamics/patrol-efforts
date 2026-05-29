@@ -1,11 +1,553 @@
 id: ranger
 
 requirements:
-  - name: "ecoscope-platform"
+  - name: ecoscope-platform
     version: ">=2.11.14, <2.12.0"
-    channel: "https://repo.prefix.dev/ecoscope-workflows/"
-  - name: "ecoscope-workflows-ext-custom"
-    version: "0.1.0rc6"
-    channel: "https://repo.prefix.dev/ecoscope-workflows-custom/"
+    channel: https://repo.prefix.dev/ecoscope-workflows/
+  - name: ecoscope-workflows-ext-custom
+    version: 0.1.0rc6
+    channel: https://repo.prefix.dev/ecoscope-workflows-custom/
 
-workflow: []
+rjsf-overrides:
+  properties:
+    patrol_obs.properties.patrol_types.ecoscope:transform:
+      - transformer: EarthRangerEnumResolver
+        transformer_kws:
+          type: patrol_type
+          depends_on: properties.er_client_name.properties.data_source.properties.name
+    events_data.properties.event_types.ecoscope:transform:
+      - transformer: EarthRangerEnumResolver
+        transformer_kws:
+          type: event_type
+          depends_on: properties.er_client_name.properties.data_source.properties.name
+    base_map_defs.properties.base_maps.default:
+      - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
+        opacity: 1.0
+      - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+        opacity: 0.5
+  uiSchema:
+    events_filter.filter_point_coords.items.ui:options.label: false
+
+task-instance-defaults:
+  skipif:
+    conditions:
+      - any_is_empty_df
+      - any_dependency_skipped
+
+workflow:
+  # ---------- Setup ----------
+  - name: Workflow Details
+    id: workflow_details
+    task: set_workflow_details
+
+  - name: Data Source
+    id: er_client_name
+    task: set_er_connection
+
+  - name: Time Range
+    id: time_range
+    task: set_time_range
+    partial:
+      time_format: '%d %b %Y %H:%M:%S'
+
+  - name: Extract Timezone Selection
+    id: get_timezone
+    task: get_timezone_from_time_range
+    partial:
+      time_range: ${{ workflow.time_range.return }}
+
+  # ---------- Data Fetching ----------
+  - name: Get Patrol Observations
+    id: patrol_obs
+    task: get_patrol_observations
+    partial:
+      client: ${{ workflow.er_client_name.return }}
+      time_range: ${{ workflow.time_range.return }}
+      include_patrol_details: true
+      raise_on_empty: false
+
+  - name: Get Events
+    id: events_data
+    task: get_events
+    partial:
+      client: ${{ workflow.er_client_name.return }}
+      time_range: ${{ workflow.time_range.return }}
+      event_columns:
+        - id
+        - time
+        - event_type
+        - event_category
+        - reported_by
+        - serial_number
+        - geometry
+      raise_on_empty: false
+      include_null_geometry: true     # count ALL events; map layer drops null geometry
+      include_display_values: true    # provides event_type_display for tooltips
+
+  - name: Leaderboard Title
+    id: set_leaderboard_title
+    task: set_string_var
+    partial:
+      var: "Ranger Leaderboard"
+
+  - name: Map Title
+    id: set_map_title
+    task: set_string_var
+    partial:
+      var: "Patrols & Events Map"
+
+  # ---------- Process Patrols ----------
+  - title: Process Patrols
+    type: task-group
+    description: "Convert patrol observations to trajectory segments."
+    tasks:
+      - name: Convert Patrols to Timezone
+        id: convert_patrols_tz
+        task: convert_values_to_timezone
+        partial:
+          df: ${{ workflow.patrol_obs.return }}
+          timezone: ${{ workflow.get_timezone.return }}
+          columns:
+            - patrol_start_time
+            - patrol_end_time
+            - fixtime
+
+      - name: Transform Observations to Relocations
+        id: patrol_reloc
+        task: process_relocations
+        partial:
+          observations: ${{ workflow.convert_patrols_tz.return }}
+          relocs_columns:
+            - patrol_id
+            - patrol_start_time
+            - patrol_end_time
+            - patrol_type__value
+            - patrol_type__display
+            - patrol_serial_number
+            - patrol_status
+            - patrol_subject
+            - groupby_col
+            - fixtime
+            - junk_status
+            - extra__source
+            - geometry
+          filter_point_coords:
+            - x: 180.0
+              y: 90.0
+            - x: 0.0
+              y: 0.0
+            - x: 1.0
+              y: 1.0
+
+      - name: Relocations to Trajectory
+        id: patrol_traj
+        task: relocations_to_trajectory
+        partial:
+          relocations: ${{ workflow.patrol_reloc.return }}
+
+      - name: Rename Trajectory Columns
+        id: traj_rename_cols
+        task: map_columns
+        partial:
+          df: ${{ workflow.patrol_traj.return }}
+          drop_columns: []
+          retain_columns: []
+          rename_columns:
+            extra__patrol_subject: patrol_subject
+            extra__patrol_id: patrol_id
+          raise_if_not_found: true
+
+  # ---------- Process Events ----------
+  - title: Process Events
+    type: task-group
+    description: "Convert event times and extract the reporting person's name."
+    tasks:
+      - name: Convert Events to Timezone
+        id: convert_events_tz
+        task: convert_values_to_timezone
+        partial:
+          df: ${{ workflow.events_data.return }}
+          timezone: ${{ workflow.get_timezone.return }}
+          columns:
+            - time
+
+      - name: Extract Reported By Name
+        id: extract_reported_by
+        task: extract_value_from_json_column
+        partial:
+          df: ${{ workflow.convert_events_tz.return }}
+          column_name: reported_by
+          field_name_options:
+            - name
+          output_type: str
+          output_column_name: reported_by_name
+
+  # ---------- Leaderboard ----------
+  - title: Ranger Leaderboard
+    type: task-group
+    description: "Per-ranger patrol metrics joined with event counts."
+    tasks:
+      - name: Summarize Patrols per Ranger
+        id: patrol_summary
+        task: summarize_df
+        partial:
+          df: ${{ workflow.traj_rename_cols.return }}
+          groupby_cols: ["patrol_subject"]
+          summary_params:
+            - display_name: "Patrol Count"
+              aggregator: nunique
+              column: patrol_id
+            - display_name: "Total Distance (km)"
+              aggregator: sum
+              column: dist_meters
+              original_unit: "m"
+              new_unit: "km"
+              decimal_places: 1
+            - display_name: "Total Duration (hrs)"
+              aggregator: sum
+              column: timespan_seconds
+              original_unit: "s"
+              new_unit: "h"
+              decimal_places: 1
+          reset_index: true
+
+      - name: Rename Patrol Summary Key
+        id: patrol_summary_rename
+        task: map_columns
+        partial:
+          df: ${{ workflow.patrol_summary.return }}
+          drop_columns: []
+          retain_columns: []
+          rename_columns:
+            patrol_subject: Ranger
+          raise_if_not_found: true
+
+      # groupby(reported_by_name) drops null-reporter rows (pandas dropna=True),
+      # so events without a reporter never become a leaderboard ranger row.
+      - name: Summarize Events per Reporter
+        id: event_summary
+        task: summarize_df
+        partial:
+          df: ${{ workflow.extract_reported_by.return }}
+          groupby_cols: ["reported_by_name"]
+          summary_params:
+            - display_name: "Event Count"
+              aggregator: count
+              column: id
+          reset_index: true
+
+      - name: Rename Event Summary Key
+        id: event_summary_rename
+        task: map_columns
+        partial:
+          df: ${{ workflow.event_summary.return }}
+          drop_columns: []
+          retain_columns: []
+          rename_columns:
+            reported_by_name: Ranger
+          raise_if_not_found: true
+
+      - name: Merge Leaderboard
+        id: leaderboard_merge
+        task: merge_two_dataframes
+        partial:
+          left: ${{ workflow.patrol_summary_rename.return }}
+          right: ${{ workflow.event_summary_rename.return }}
+          how: outer
+          on: Ranger
+          left_on: null
+          right_on: null
+          left_index: false
+          right_index: false
+          fillna_value: 0
+
+      - name: Sort Leaderboard
+        id: leaderboard_sorted
+        task: sort_values
+        partial:
+          df: ${{ workflow.leaderboard_merge.return }}
+          column_name: "Ranger"
+          ascending: true
+          na_position: last
+
+      - name: Draw Leaderboard Table
+        id: leaderboard_table
+        task: draw_table
+        partial:
+          dataframe: ${{ workflow.leaderboard_sorted.return }}
+          widget_id: ${{ workflow.set_leaderboard_title.return }}
+          columns:
+            - Ranger
+            - Patrol Count
+            - Total Distance (km)
+            - Total Duration (hrs)
+            - Event Count
+          table_config:
+            enable_sorting: true
+            enable_filtering: false
+            enable_download: true
+            hide_header: false
+
+      - name: Persist Leaderboard Table
+        id: leaderboard_table_html
+        task: persist_text
+        partial:
+          text: ${{ workflow.leaderboard_table.return }}
+          root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+          filename_suffix: leaderboard
+
+      - name: Create Leaderboard Table Widget
+        id: leaderboard_table_widget
+        task: create_table_widget_single_view
+        skipif:
+          conditions:
+            - never
+        partial:
+          title: ${{ workflow.set_leaderboard_title.return }}
+          data: ${{ workflow.leaderboard_table_html.return }}
+
+  # ---------- Total Statistics ----------
+  - title: Total Statistics
+    type: task-group
+    description: "Headline totals across all rangers."
+    tasks:
+      - name: Total Patrols
+        id: total_patrols
+        task: dataframe_column_nunique
+        partial:
+          df: ${{ workflow.traj_rename_cols.return }}
+          column_name: patrol_id
+
+      - name: Total Patrols Widget
+        id: total_patrols_sv
+        task: create_single_value_widget_single_view
+        skipif:
+          conditions:
+            - never
+        partial:
+          title: "Total Patrols"
+          data: ${{ workflow.total_patrols.return }}
+          decimal_places: 0
+
+      - name: Total Distance
+        id: total_distance
+        task: dataframe_column_sum
+        partial:
+          df: ${{ workflow.traj_rename_cols.return }}
+          column_name: dist_meters
+
+      - name: Convert Distance to km
+        id: total_distance_km
+        task: with_unit
+        partial:
+          value: ${{ workflow.total_distance.return }}
+          original_unit: "m"
+          new_unit: "km"
+
+      - name: Total Distance Widget
+        id: total_distance_sv
+        task: create_single_value_widget_single_view
+        skipif:
+          conditions:
+            - never
+        partial:
+          title: "Total Distance (km)"
+          data: ${{ workflow.total_distance_km.return }}
+          decimal_places: 1
+
+      - name: Total Duration
+        id: total_duration
+        task: dataframe_column_sum
+        partial:
+          df: ${{ workflow.traj_rename_cols.return }}
+          column_name: timespan_seconds
+
+      - name: Convert Duration to hrs
+        id: total_duration_hrs
+        task: with_unit
+        partial:
+          value: ${{ workflow.total_duration.return }}
+          original_unit: "s"
+          new_unit: "h"
+
+      - name: Total Duration Widget
+        id: total_duration_sv
+        task: create_single_value_widget_single_view
+        skipif:
+          conditions:
+            - never
+        partial:
+          title: "Total Duration (hrs)"
+          data: ${{ workflow.total_duration_hrs.return }}
+          decimal_places: 1
+
+      # Sum of per-ranger event counts == total reporter-attributed events,
+      # consistent-by-construction with the leaderboard.
+      - name: Total Events
+        id: total_events
+        task: dataframe_column_sum
+        partial:
+          df: ${{ workflow.event_summary.return }}
+          column_name: "Event Count"
+
+      - name: Total Events Widget
+        id: total_events_sv
+        task: create_single_value_widget_single_view
+        skipif:
+          conditions:
+            - never
+        partial:
+          title: "Total Events"
+          data: ${{ workflow.total_events.return }}
+          decimal_places: 0
+
+  # ---------- Patrols & Events Map ----------
+  - title: Patrols & Events Map
+    type: task-group
+    description: "Patrol tracks (uniform) overlaid with event points (by type)."
+    tasks:
+      - name: Map Base Layers
+        id: base_map_defs
+        task: set_base_maps
+
+      - name: Filter Event Locations
+        id: events_filter
+        task: apply_reloc_coord_filter
+        partial:
+          df: ${{ workflow.extract_reported_by.return }}
+          roi_gdf: null
+          roi_name: null
+          reset_index: true
+
+      - name: Events Colormap
+        id: events_colormap
+        task: apply_color_map
+        partial:
+          df: ${{ workflow.events_filter.return }}
+          input_column_name: event_type
+          colormap: tab20b
+          output_column_name: event_type_colormap
+
+      - name: Rename Event Columns for Display
+        id: events_display_rename
+        task: map_columns
+        partial:
+          df: ${{ workflow.events_colormap.return }}
+          drop_columns: []
+          retain_columns: []
+          rename_columns:
+            serial_number: "Event Serial"
+            time: "Event Time"
+            event_type_display: "Event Type"
+            reported_by_name: "Reported By"
+          raise_if_not_found: false
+
+      - name: Create Event Point Layer
+        id: event_point_layer
+        task: create_point_layer
+        skipif:
+          conditions:
+            - any_is_empty_df
+            - any_dependency_skipped
+            - all_geometry_are_none
+        partial:
+          geodataframe: ${{ workflow.events_display_rename.return }}
+          layer_style:
+            fill_color_column: event_type_colormap
+            get_radius: 5
+          legend:
+            label_column: "Event Type"
+            color_column: event_type_colormap
+          tooltip_columns:
+            - "Event Serial"
+            - "Event Time"
+            - "Event Type"
+            - "Reported By"
+
+      - name: Rename Track Columns for Display
+        id: traj_display_rename
+        task: map_columns
+        partial:
+          df: ${{ workflow.traj_rename_cols.return }}
+          drop_columns: []
+          retain_columns: []
+          rename_columns:
+            patrol_subject: "Patrol Subject"
+            segment_start: "Start"
+            speed_kmhr: "Speed (kph)"
+          raise_if_not_found: false
+
+      - name: Create Track Polyline Layer
+        id: traj_polyline_layer
+        task: create_polyline_layer
+        skipif:
+          conditions:
+            - any_is_empty_df
+            - any_dependency_skipped
+            - all_geometry_are_none
+        partial:
+          geodataframe: ${{ workflow.traj_display_rename.return }}
+          layer_style:
+            get_color: [80, 80, 80]        # uniform gray tracks
+            color_column: null
+            get_width: 3
+            width_units: pixels
+            cap_rounded: true
+            opacity: 1
+          legend: null
+          tooltip_columns:
+            - "Patrol Subject"
+            - "Start"
+            - "Speed (kph)"
+
+      - name: Draw Ecomap
+        id: map_ecomap
+        task: draw_ecomap
+        partial:
+          geo_layers:
+            - ${{ workflow.traj_polyline_layer.return }}
+            - ${{ workflow.event_point_layer.return }}
+          title: null
+          tile_layers: ${{ workflow.base_map_defs.return }}
+          north_arrow_style:
+            placement: top-left
+          legend_style:
+            title: "Event Type"
+            format_title: false
+            placement: bottom-right
+          static: false
+          max_zoom: 20
+          widget_id: ${{ workflow.set_map_title.return }}
+
+      - name: Persist Ecomap
+        id: map_ecomap_html
+        task: persist_text
+        partial:
+          text: ${{ workflow.map_ecomap.return }}
+          root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+          filename_suffix: ranger_map
+
+      - name: Create Map Widget
+        id: map_widget
+        task: create_map_widget_single_view
+        skipif:
+          conditions:
+            - never
+        partial:
+          title: ${{ workflow.set_map_title.return }}
+          data: ${{ workflow.map_ecomap_html.return }}
+
+  # ---------- Dashboard ----------
+  - name: Create Dashboard
+    id: ranger_dashboard
+    task: gather_dashboard
+    partial:
+      details: ${{ workflow.workflow_details.return }}
+      widgets:
+        - ${{ workflow.total_patrols_sv.return }}
+        - ${{ workflow.total_distance_sv.return }}
+        - ${{ workflow.total_duration_sv.return }}
+        - ${{ workflow.total_events_sv.return }}
+        - ${{ workflow.leaderboard_table_widget.return }}
+        - ${{ workflow.map_widget.return }}
+      time_range: ${{ workflow.time_range.return }}
