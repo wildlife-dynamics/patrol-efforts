@@ -243,6 +243,13 @@ class BaseMapDefs(BaseModel):
     )
 
 
+class ExcludeRangers(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    vars: List[str] = Field(..., title="")
+
+
 class EarthRangerConnection(BaseModel):
     name: str = Field(..., title="Data Source")
 
@@ -359,5 +366,6 @@ class Params(BaseModel):
     patrol_obs: Optional[PatrolObs] = Field(None, title="Get Patrol Observations")
     events_data: Optional[EventsData] = Field(None, title="Get Events")
     base_map_defs: Optional[BaseMapDefs] = Field(None, title="Map Base Layers")
+    exclude_rangers: Optional[ExcludeRangers] = Field(None, title="Exclude Rangers")
     patrol_traj: Optional[PatrolTraj] = Field(None, title="Relocations to Trajectory")
     events_filter: Optional[EventsFilter] = Field(None, title="Filter Event Locations")

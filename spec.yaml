@@ -25,6 +25,10 @@ rjsf-overrides:
         opacity: 1.0
       - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
         opacity: 0.5
+    exclude_rangers.properties.vars.title: "Names to Exclude"
+    exclude_rangers.properties.vars.description: "Optional. Ranger names to exclude from the leaderboard, totals, and the map. Names must match the EarthRanger subject name (for patrols) or user display name (for events) exactly; entries that don't match any rangers are ignored."
+    exclude_rangers.properties.vars.default: []
+    exclude_rangers.properties.vars.ecoscope:advanced: true
   uiSchema:
     Patrols & Events Map.events_filter.filter_point_coords.items.ui:options.label: false
 
@@ -109,6 +113,13 @@ workflow:
     id: base_map_defs
     task: set_base_maps
 
+  # User-facing list of ranger names to drop from leaderboard, totals, and
+  # the map. Default [] = passthrough. Applied via exclude_row_values against
+  # both patrol_subject (tracks/patrol metrics) and reported_by_name (events).
+  - name: Exclude Rangers
+    id: exclude_rangers
+    task: set_list_of_string_vars
+
   # ---------- Process Patrols ----------
   - title: Process Patrols
     type: task-group
@@ -170,6 +181,16 @@ workflow:
             extra__patrol_id: patrol_id
           raise_if_not_found: true
 
+      # No-op when exclude_rangers is empty (exclude_row_values passthroughs
+      # on None/empty list).
+      - name: Drop Excluded Rangers from Patrols
+        id: traj_exclude_rangers
+        task: exclude_row_values
+        partial:
+          df: ${{ workflow.traj_rename_cols.return }}
+          column: patrol_subject
+          values: ${{ workflow.exclude_rangers.return }}
+
   # ---------- Process Events ----------
   - title: Process Events
     type: task-group
@@ -209,6 +230,15 @@ workflow:
           value: "None"
           reset_index: true
 
+      # No-op when exclude_rangers is empty.
+      - name: Drop Excluded Rangers from Events
+        id: events_exclude_rangers
+        task: exclude_row_values
+        partial:
+          df: ${{ workflow.events_with_reporter.return }}
+          column: reported_by_name
+          values: ${{ workflow.exclude_rangers.return }}
+
   # ---------- Leaderboard ----------
   - title: Ranger Leaderboard
     type: task-group
@@ -218,7 +248,7 @@ workflow:
         id: patrol_summary
         task: summarize_df
         partial:
-          df: ${{ workflow.traj_rename_cols.return }}
+          df: ${{ workflow.traj_exclude_rangers.return }}
           groupby_cols: ["patrol_subject"]
           summary_params:
             - display_name: "Patrol Count"
@@ -253,7 +283,7 @@ workflow:
         id: event_summary
         task: summarize_df
         partial:
-          df: ${{ workflow.events_with_reporter.return }}
+          df: ${{ workflow.events_exclude_rangers.return }}
           groupby_cols: ["reported_by_name"]
           summary_params:
             - display_name: "Event Count"
@@ -340,7 +370,7 @@ workflow:
         id: total_patrols
         task: dataframe_column_nunique
         partial:
-          df: ${{ workflow.traj_rename_cols.return }}
+          df: ${{ workflow.traj_exclude_rangers.return }}
           column_name: patrol_id
 
       - name: Total Patrols Widget
@@ -358,7 +388,7 @@ workflow:
         id: total_distance
         task: dataframe_column_sum
         partial:
-          df: ${{ workflow.traj_rename_cols.return }}
+          df: ${{ workflow.traj_exclude_rangers.return }}
           column_name: dist_meters
 
       - name: Convert Distance to km
@@ -384,7 +414,7 @@ workflow:
         id: total_duration
         task: dataframe_column_sum
         partial:
-          df: ${{ workflow.traj_rename_cols.return }}
+          df: ${{ workflow.traj_exclude_rangers.return }}
           column_name: timespan_seconds
 
       - name: Convert Duration to hrs
@@ -438,7 +468,7 @@ workflow:
         id: events_filter
         task: apply_reloc_coord_filter
         partial:
-          df: ${{ workflow.events_with_reporter.return }}
+          df: ${{ workflow.events_exclude_rangers.return }}
           roi_gdf: null
           roi_name: null
           reset_index: true
@@ -492,7 +522,7 @@ workflow:
         id: traj_display_rename
         task: map_columns
         partial:
-          df: ${{ workflow.traj_rename_cols.return }}
+          df: ${{ workflow.traj_exclude_rangers.return }}
           drop_columns: []
           retain_columns: []
           rename_columns:

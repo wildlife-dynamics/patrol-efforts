@@ -243,6 +243,17 @@ class BaseMapDefs(BaseModel):
     )
 
 
+class ExcludeRangers(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    vars: List[str] = Field(
+        ...,
+        description="Optional. Ranger names to exclude from the leaderboard, totals, and the map. Names must match the EarthRanger subject name (for patrols) or user display name (for events) exactly; entries that don't match any rangers are ignored.",
+        title="Names to Exclude",
+    )
+
+
 class EarthRangerConnection(BaseModel):
     name: str = Field(..., title="Data Source")
 
@@ -367,6 +378,7 @@ class FormData(BaseModel):
     patrol_obs: Optional[PatrolObs] = Field(None, title="Get Patrol Observations")
     events_data: Optional[EventsData] = Field(None, title="Get Events")
     base_map_defs: Optional[BaseMapDefs] = Field(None, title="Map Base Layers")
+    exclude_rangers: Optional[ExcludeRangers] = Field(None, title="Exclude Rangers")
     Process_Patrols: Optional[ProcessPatrols] = Field(
         None,
         alias="Process Patrols",

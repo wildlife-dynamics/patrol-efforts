@@ -40,6 +40,9 @@ from ecoscope.platform.tasks.analysis import (
     dataframe_column_sum as dataframe_column_sum,
 )
 from ecoscope.platform.tasks.analysis import summarize_df as summarize_df
+from ecoscope.platform.tasks.config import (
+    set_list_of_string_vars as set_list_of_string_vars,
+)
 from ecoscope.platform.tasks.config import set_string_var as set_string_var
 from ecoscope.platform.tasks.io import persist_text as persist_text
 from ecoscope.platform.tasks.preprocessing import (
@@ -81,6 +84,9 @@ from ecoscope.platform.tasks.transformation import filter_df as filter_df
 from ecoscope.platform.tasks.transformation import map_columns as map_columns
 from ecoscope.platform.tasks.transformation import sort_values as sort_values
 from ecoscope.platform.tasks.transformation import with_unit as with_unit
+from ecoscope_workflows_ext_custom.tasks.transformation import (
+    exclude_row_values as exclude_row_values,
+)
 from ecoscope_workflows_ext_custom.tasks.transformation import (
     merge_two_dataframes as merge_two_dataframes,
 )
@@ -273,6 +279,23 @@ def main(params: Params):
         .call()
     )
 
+    exclude_rangers = (
+        task(set_list_of_string_vars)
+        .validate()
+        .set_task_instance_id("exclude_rangers")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(**(params_dict.get("exclude_rangers") or {}))
+        .call()
+    )
+
     convert_patrols_tz = (
         task(convert_values_to_timezone)
         .validate()
@@ -379,6 +402,28 @@ def main(params: Params):
         .call()
     )
 
+    traj_exclude_rangers = (
+        task(exclude_row_values)
+        .validate()
+        .set_task_instance_id("traj_exclude_rangers")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            df=traj_rename_cols,
+            column="patrol_subject",
+            values=exclude_rangers,
+            **(params_dict.get("traj_exclude_rangers") or {}),
+        )
+        .call()
+    )
+
     convert_events_tz = (
         task(convert_values_to_timezone)
         .validate()
@@ -449,6 +494,28 @@ def main(params: Params):
         .call()
     )
 
+    events_exclude_rangers = (
+        task(exclude_row_values)
+        .validate()
+        .set_task_instance_id("events_exclude_rangers")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            df=events_with_reporter,
+            column="reported_by_name",
+            values=exclude_rangers,
+            **(params_dict.get("events_exclude_rangers") or {}),
+        )
+        .call()
+    )
+
     patrol_summary = (
         task(summarize_df)
         .validate()
@@ -463,7 +530,7 @@ def main(params: Params):
             unpack_depth=1,
         )
         .partial(
-            df=traj_rename_cols,
+            df=traj_exclude_rangers,
             groupby_cols=["patrol_subject"],
             summary_params=[
                 {
@@ -532,7 +599,7 @@ def main(params: Params):
             unpack_depth=1,
         )
         .partial(
-            df=events_with_reporter,
+            df=events_exclude_rangers,
             groupby_cols=["reported_by_name"],
             summary_params=[
                 {"display_name": "Event Count", "aggregator": "count", "column": "id"}
@@ -708,7 +775,7 @@ def main(params: Params):
             unpack_depth=1,
         )
         .partial(
-            df=traj_rename_cols,
+            df=traj_exclude_rangers,
             column_name="patrol_id",
             **(params_dict.get("total_patrols") or {}),
         )
@@ -750,7 +817,7 @@ def main(params: Params):
             unpack_depth=1,
         )
         .partial(
-            df=traj_rename_cols,
+            df=traj_exclude_rangers,
             column_name="dist_meters",
             **(params_dict.get("total_distance") or {}),
         )
@@ -814,7 +881,7 @@ def main(params: Params):
             unpack_depth=1,
         )
         .partial(
-            df=traj_rename_cols,
+            df=traj_exclude_rangers,
             column_name="timespan_seconds",
             **(params_dict.get("total_duration") or {}),
         )
@@ -920,7 +987,7 @@ def main(params: Params):
             unpack_depth=1,
         )
         .partial(
-            df=events_with_reporter,
+            df=events_exclude_rangers,
             roi_gdf=None,
             roi_name=None,
             reset_index=True,
@@ -1022,7 +1089,7 @@ def main(params: Params):
             unpack_depth=1,
         )
         .partial(
-            df=traj_rename_cols,
+            df=traj_exclude_rangers,
             drop_columns=[],
             retain_columns=[],
             rename_columns={

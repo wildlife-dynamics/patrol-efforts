@@ -383,6 +383,26 @@
       "required": [],
       "title": "Map Base Layers"
     },
+    "exclude_rangers": {
+      "additionalProperties": false,
+      "properties": {
+        "vars": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Names to Exclude",
+          "type": "array",
+          "description": "Optional. Ranger names to exclude from the leaderboard, totals, and the map. Names must match the EarthRanger subject name (for patrols) or user display name (for events) exactly; entries that don't match any rangers are ignored.",
+          "default": [],
+          "ecoscope:advanced": true
+        }
+      },
+      "required": [
+        "vars"
+      ],
+      "type": "object",
+      "title": "Exclude Rangers"
+    },
     "Process Patrols": {
       "type": "object",
       "description": "Convert patrol observations to trajectory segments.",
@@ -651,6 +671,7 @@
       "patrol_obs",
       "events_data",
       "base_map_defs",
+      "exclude_rangers",
       "Process Patrols",
       "Patrols & Events Map"
     ]

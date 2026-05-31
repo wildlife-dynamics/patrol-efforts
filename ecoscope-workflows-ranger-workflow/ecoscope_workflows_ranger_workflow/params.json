@@ -365,6 +365,23 @@
       "required": [],
       "title": "Map Base Layers"
     },
+    "exclude_rangers": {
+      "additionalProperties": false,
+      "properties": {
+        "vars": {
+          "items": {
+            "type": "string"
+          },
+          "title": "",
+          "type": "array"
+        }
+      },
+      "required": [
+        "vars"
+      ],
+      "type": "object",
+      "title": "Exclude Rangers"
+    },
     "patrol_traj": {
       "additionalProperties": false,
       "properties": {
@@ -610,6 +627,7 @@
       "patrol_obs",
       "events_data",
       "base_map_defs",
+      "exclude_rangers",
       "patrol_traj",
       "events_filter"
     ]
