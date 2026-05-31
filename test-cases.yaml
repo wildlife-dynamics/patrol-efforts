@@ -28,34 +28,34 @@ base:
         - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
           opacity: 1.0
 
-er_asia:
-  name: ER Asia
-  description: Live EarthRanger (er-asia), 1-6 May 2026, demo_patrol + wildlife sightings.
-  mock_io: false
-  params:
-    workflow_details:
-      name: "Ranger Leaderboard"
-      description: "Per-ranger patrol and event activity."
-    er_client_name:
-      data_source:
-        name: "er_asia"
-    time_range:
-      since: "2026-05-01T00:00:00"
-      until: "2026-05-06T23:59:59"
-      timezone:
-        label: "UTC (UTC+00:00)"
-        tzCode: "UTC"
-        name: "(UTC+00:00) UTC"
-        utc: "+00:00"
-    patrol_obs:
-      patrol_types: ["demo_patrol"]
-    events_data:
-      event_types: ["wildlife_sighting_rep"]
-    events_filter:
-      filter_point_coords: []
-    base_map_defs:
-      base_maps:
-        - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
-          opacity: 1.0
-        - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-          opacity: 0.5
+# er_asia:
+#   name: ER Asia
+#   description: Live EarthRanger (er-asia), 1-6 May 2026, demo_patrol + wildlife sightings.
+#   mock_io: false
+#   params:
+#     workflow_details:
+#       name: "Ranger Leaderboard"
+#       description: "Per-ranger patrol and event activity."
+#     er_client_name:
+#       data_source:
+#         name: "er_asia"
+#     time_range:
+#       since: "2026-05-01T00:00:00"
+#       until: "2026-05-06T23:59:59"
+#       timezone:
+#         label: "UTC (UTC+00:00)"
+#         tzCode: "UTC"
+#         name: "(UTC+00:00) UTC"
+#         utc: "+00:00"
+#     patrol_obs:
+#       patrol_types: ["demo_patrol"]
+#     events_data:
+#       event_types: ["wildlife_sighting_rep"]
+#     events_filter:
+#       filter_point_coords: []
+#     base_map_defs:
+#       base_maps:
+#         - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
+#           opacity: 1.0
+#         - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+#           opacity: 0.5
