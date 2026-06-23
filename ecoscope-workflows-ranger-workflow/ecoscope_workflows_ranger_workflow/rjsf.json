@@ -68,6 +68,43 @@
       "description": "Choose the period of time to analyze.",
       "title": "Time Range"
     },
+    "groupers": {
+      "additionalProperties": false,
+      "properties": {
+        "groupers": {
+          "default": null,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ValueGrouper"
+              },
+              {
+                "$ref": "#/$defs/TemporalGrouper"
+              },
+              {
+                "$ref": "#/$defs/SpatialGrouper"
+              }
+            ],
+            "title": "Group by"
+          },
+          "title": " ",
+          "type": "array",
+          "description": "            Specify how the data should be grouped to create the views for your dashboard.\n            This field is optional; if left blank, all the data will appear in a single view.\n            ",
+          "ecoscope:transform": [
+            {
+              "transformer": "EarthRangerEnumResolver",
+              "transformer_kws": {
+                "type": "spatial_feature_group",
+                "depends_on": "properties.er_client_name.properties.data_source.properties.name"
+              }
+            }
+          ]
+        }
+      },
+      "type": "object",
+      "required": [],
+      "title": "Dashboard Groupers"
+    },
     "patrol_obs": {
       "additionalProperties": false,
       "properties": {
@@ -194,6 +231,7 @@
             "title": "Base Layer",
             "anyOf": [
               {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
                 "properties": {
                   "url": {
                     "default": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -218,6 +256,7 @@
                 "type": "object"
               },
               {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
                 "properties": {
                   "url": {
                     "default": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
@@ -242,6 +281,7 @@
                 "type": "object"
               },
               {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
                 "properties": {
                   "url": {
                     "default": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
@@ -266,6 +306,7 @@
                 "type": "object"
               },
               {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
                 "properties": {
                   "url": {
                     "default": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
@@ -290,30 +331,7 @@
                 "type": "object"
               },
               {
-                "properties": {
-                  "url": {
-                    "default": "https://tiles.arcgis.com/tiles/POUcpLYXNckpLjnY/arcgis/rest/services/landDx_basemap_tiles_mapservice/MapServer/tile/{z}/{y}/{x}",
-                    "title": "Preset Layer URL",
-                    "type": "string",
-                    "const": "https://tiles.arcgis.com/tiles/POUcpLYXNckpLjnY/arcgis/rest/services/landDx_basemap_tiles_mapservice/MapServer/tile/{z}/{y}/{x}",
-                    "enum": [
-                      "https://tiles.arcgis.com/tiles/POUcpLYXNckpLjnY/arcgis/rest/services/landDx_basemap_tiles_mapservice/MapServer/tile/{z}/{y}/{x}"
-                    ]
-                  },
-                  "opacity": {
-                    "default": 1,
-                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
-                    "ecoscope:advanced": true,
-                    "maximum": 1.0,
-                    "minimum": 0.0,
-                    "title": "Layer Opacity",
-                    "type": "number"
-                  }
-                },
-                "title": "LandDx",
-                "type": "object"
-              },
-              {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
                 "properties": {
                   "url": {
                     "default": "https://server.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}",
@@ -338,6 +356,7 @@
                 "type": "object"
               },
               {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
                 "properties": {
                   "url": {
                     "default": "https://example.tiles.com/{z}/{x}/{y}.png",
@@ -356,13 +375,13 @@
                     "type": "number"
                   },
                   "max_zoom": {
-                    "default": null,
+                    "default": 20,
                     "description": "Set the maximum zoom level to fetch tiles for.",
                     "title": "Custom Layer Max Zoom",
                     "type": "integer"
                   },
                   "min_zoom": {
-                    "default": null,
+                    "default": 0,
                     "description": "Set the minimum zoom level to fetch tiles for.",
                     "title": "Custom Layer Min Zoom",
                     "type": "integer"
@@ -392,7 +411,7 @@
           },
           "title": "Names to Exclude",
           "type": "array",
-          "description": "Optional. Ranger names to exclude from the leaderboard, totals, and the map. Names must match the EarthRanger subject name (for patrols) or user display name (for events) exactly; entries that don't match any rangers are ignored.",
+          "description": "Optional. Ranger names to exclude from the summary table and the map. Names must match the EarthRanger subject name (patrols) or user display name (events) exactly; unmatched entries are ignored.",
           "default": [],
           "ecoscope:advanced": true
         }
@@ -405,7 +424,7 @@
     },
     "Process Patrols": {
       "type": "object",
-      "description": "Convert patrol observations to trajectory segments.",
+      "description": "Convert patrol observations to trajectory segments and tag patrol date.",
       "ecoscope:task_group": true,
       "properties": {
         "patrol_traj": {
@@ -433,47 +452,234 @@
           "required": [],
           "type": "object",
           "title": "Relocations to Trajectory"
+        },
+        "traj_with_date": {
+          "additionalProperties": false,
+          "properties": {
+            "column_prefix": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Column Prefix",
+              "description": "Custom prefix for generated columns (defaults to datetime_column name)."
+            }
+          },
+          "required": [],
+          "type": "object",
+          "title": "Add Patrol Date"
         }
       }
     },
-    "Patrols & Events Map": {
+    "events_filter": {
+      "additionalProperties": false,
+      "properties": {
+        "bounding_box": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/BoundingBox"
+            }
+          ],
+          "default": {
+            "min_y": -90.0,
+            "max_y": 90.0,
+            "min_x": -180.0,
+            "max_x": 180.0
+          },
+          "title": "Bounding Box",
+          "description": "Filter events to inside these bounding coordinates.",
+          "ecoscope:advanced": true
+        },
+        "filter_point_coords": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Coordinate"
+          },
+          "title": "Filter Exact Point Coordinates",
+          "type": "array",
+          "description": "By adding a filter, the workflow will not include events recorded at the specified coordinates.",
+          "ecoscope:advanced": true
+        }
+      },
+      "required": [],
       "type": "object",
-      "description": "Patrol tracks (uniform) overlaid with event points (by type).",
+      "title": "Filter Event Locations"
+    },
+    "Patrol Effort Summary": {
+      "type": "object",
+      "description": "Per-category patrol metrics. Choose the category column and which metrics to show.",
       "ecoscope:task_group": true,
       "properties": {
-        "events_filter": {
+        "summary_table_df": {
           "additionalProperties": false,
           "properties": {
-            "bounding_box": {
-              "allOf": [
+            "summary_params": {
+              "items": {
+                "$ref": "#/$defs/SummaryParam"
+              },
+              "title": "Summary Metrics",
+              "type": "array",
+              "description": "Columns shown in the summary table. Add or remove rows to customize. 'Merged/Unmerged Area Covered' use the Swath Width on the row.",
+              "default": [
                 {
-                  "$ref": "#/$defs/BoundingBox"
+                  "display_name": "Patrol Count",
+                  "aggregator": "nunique",
+                  "column": "patrol_id"
+                },
+                {
+                  "display_name": "Total Distance (km)",
+                  "aggregator": "sum",
+                  "column": "dist_meters",
+                  "original_unit": "m",
+                  "new_unit": "km",
+                  "decimal_places": 1
+                },
+                {
+                  "display_name": "Total Duration (hrs)",
+                  "aggregator": "sum",
+                  "column": "timespan_seconds",
+                  "original_unit": "s",
+                  "new_unit": "h",
+                  "decimal_places": 1
+                },
+                {
+                  "display_name": "Patrol Days",
+                  "aggregator": "nunique",
+                  "column": "segment_start_date"
+                },
+                {
+                  "display_name": "Merged Area Covered (km\u00b2)",
+                  "aggregator": "merged_coverage_area",
+                  "swath_width_meters": 500.0,
+                  "decimal_places": 1
+                },
+                {
+                  "display_name": "Unmerged Area Covered (km\u00b2)",
+                  "aggregator": "unmerged_coverage_area",
+                  "swath_width_meters": 500.0,
+                  "decimal_places": 1
+                }
+              ]
+            },
+            "groupby_cols": {
+              "default": [
+                "patrol_subject"
+              ],
+              "items": {
+                "type": "string",
+                "enum": [
+                  "patrol_subject",
+                  "patrol_type__value",
+                  "patrol_status"
+                ]
+              },
+              "title": "Category Column",
+              "type": "array",
+              "description": "Column to group summary rows by. Default: patrol subject (ranger). Other options: patrol_type__value, patrol_status."
+            }
+          },
+          "required": [
+            "summary_params"
+          ],
+          "type": "object",
+          "title": "Summarize Patrol Effort"
+        }
+      }
+    },
+    "Patrol Coverage Map": {
+      "type": "object",
+      "description": "Grid heatmap of patrol effort, weighted by total time or distance per cell.",
+      "ecoscope:task_group": true,
+      "properties": {
+        "coverage_meshgrid": {
+          "additionalProperties": false,
+          "properties": {
+            "auto_scale_or_custom_cell_size": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AutoScaleGridCellSize"
+                },
+                {
+                  "$ref": "#/$defs/CustomGridCellSize"
                 }
               ],
               "default": {
-                "min_y": -90.0,
-                "max_y": 90.0,
-                "min_x": -180.0,
-                "max_x": 180.0
+                "auto_scale_or_custom": "Auto-scale"
               },
-              "title": "Bounding Box",
-              "description": "Filter events to inside these bounding coordinates.",
+              "title": "Grid Cell Size",
               "ecoscope:advanced": true
             },
-            "filter_point_coords": {
-              "default": [],
-              "items": {
-                "$ref": "#/$defs/Coordinate"
-              },
-              "title": "Filter Exact Point Coordinates",
-              "type": "array",
-              "description": "By adding a filter, the workflow will not include events recorded at the specified coordinates.",
+            "crs": {
+              "default": "EPSG:3857",
+              "title": "Coordinate Reference System",
+              "type": "string",
+              "description": "The coordinate reference system in which to perform the calculation, must be a valid CRS authority code, for example ESRI:53042",
               "ecoscope:advanced": true
             }
           },
           "required": [],
           "type": "object",
-          "title": "Filter Event Locations"
+          "title": "Coverage Meshgrid"
+        },
+        "grouped_coverage_density": {
+          "additionalProperties": false,
+          "properties": {
+            "sum_column": {
+              "default": "timespan_seconds",
+              "title": "Coverage Weighting",
+              "type": "string",
+              "description": "Weight each grid cell by total patrol time (timespan_seconds) or distance travelled (dist_meters).",
+              "enum": [
+                "timespan_seconds",
+                "dist_meters"
+              ]
+            }
+          },
+          "required": [],
+          "type": "object",
+          "title": "Calculate Patrol Effort per Cell"
+        }
+      }
+    },
+    "Event Density Map": {
+      "type": "object",
+      "description": "Grid heatmap of event counts per cell.",
+      "ecoscope:task_group": true,
+      "properties": {
+        "event_meshgrid": {
+          "additionalProperties": false,
+          "properties": {
+            "auto_scale_or_custom_cell_size": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AutoScaleGridCellSize"
+                },
+                {
+                  "$ref": "#/$defs/CustomGridCellSize"
+                }
+              ],
+              "default": {
+                "auto_scale_or_custom": "Auto-scale"
+              },
+              "title": "Grid Cell Size",
+              "ecoscope:advanced": true
+            },
+            "crs": {
+              "default": "EPSG:3857",
+              "title": "Coordinate Reference System",
+              "type": "string",
+              "description": "The coordinate reference system in which to perform the calculation, must be a valid CRS authority code, for example ESRI:53042",
+              "ecoscope:advanced": true
+            }
+          },
+          "required": [],
+          "type": "object",
+          "title": "Event Meshgrid"
         }
       }
     }
@@ -518,6 +724,79 @@
         "utc"
       ],
       "title": "TimezoneInfo",
+      "type": "object"
+    },
+    "SpatialGrouper": {
+      "properties": {
+        "spatial_index_name": {
+          "title": "Spatial Regions",
+          "type": "string"
+        }
+      },
+      "required": [
+        "spatial_index_name"
+      ],
+      "title": "Spatial",
+      "type": "object"
+    },
+    "TemporalGrouper": {
+      "properties": {
+        "temporal_index": {
+          "oneOf": [
+            {
+              "const": "%Y",
+              "title": "Year (example: 2024)"
+            },
+            {
+              "const": "%B",
+              "title": "Month (example: September)"
+            },
+            {
+              "const": "%Y-%m",
+              "title": "Year and Month (example: 2023-01)"
+            },
+            {
+              "const": "%j",
+              "title": "Day of the year as a number (example: 365)"
+            },
+            {
+              "const": "%d",
+              "title": "Day of the month as a number (example: 31)"
+            },
+            {
+              "const": "%A",
+              "title": "Day of the week (example: Sunday)"
+            },
+            {
+              "const": "%H",
+              "title": "Hour (24-hour clock) as number (example: 22)"
+            },
+            {
+              "const": "%Y-%m-%d",
+              "title": "Date (example: 2025-01-31)"
+            }
+          ],
+          "title": "Time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "temporal_index"
+      ],
+      "title": "Time",
+      "type": "object"
+    },
+    "ValueGrouper": {
+      "properties": {
+        "index_name": {
+          "title": "Category",
+          "type": "string"
+        }
+      },
+      "required": [
+        "index_name"
+      ],
+      "title": "Category",
       "type": "object"
     },
     "TrajectorySegmentFilter": {
@@ -617,6 +896,127 @@
       ],
       "title": "Coordinate",
       "type": "object"
+    },
+    "SummaryParam": {
+      "properties": {
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "aggregator": {
+          "enum": [
+            "sum",
+            "count",
+            "min",
+            "max",
+            "mean",
+            "unique",
+            "nunique",
+            "median",
+            "night_day_ratio",
+            "merged_coverage_area",
+            "unmerged_coverage_area"
+          ],
+          "title": "Aggregator",
+          "type": "string"
+        },
+        "column": {
+          "default": null,
+          "title": "Column",
+          "type": "string"
+        },
+        "original_unit": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/Unit"
+            }
+          ],
+          "default": null,
+          "title": "Original Unit"
+        },
+        "new_unit": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/Unit"
+            }
+          ],
+          "default": null,
+          "title": "New Unit"
+        },
+        "decimal_places": {
+          "default": 2,
+          "title": "Decimal Places",
+          "type": "integer"
+        },
+        "swath_width_meters": {
+          "default": null,
+          "title": "Swath Width Meters",
+          "type": "number"
+        }
+      },
+      "required": [
+        "display_name",
+        "aggregator"
+      ],
+      "title": "SummaryParam",
+      "type": "object"
+    },
+    "Unit": {
+      "enum": [
+        "m",
+        "km",
+        "m\u00b2",
+        "km\u00b2",
+        "s",
+        "h",
+        "d",
+        "m/s",
+        "km/h"
+      ],
+      "title": "Unit",
+      "type": "string"
+    },
+    "AutoScaleGridCellSize": {
+      "properties": {
+        "auto_scale_or_custom": {
+          "const": "Auto-scale",
+          "default": "Auto-scale",
+          "ecoscope:advanced": true,
+          "enum": [
+            "Auto-scale"
+          ],
+          "title": "Grid Cell Size",
+          "type": "string"
+        }
+      },
+      "title": "Auto-scale",
+      "type": "object"
+    },
+    "CustomGridCellSize": {
+      "properties": {
+        "auto_scale_or_custom": {
+          "const": "Customize",
+          "default": "Customize",
+          "ecoscope:advanced": true,
+          "enum": [
+            "Customize"
+          ],
+          "title": "Grid Cell Size",
+          "type": "string"
+        },
+        "grid_cell_size": {
+          "default": 5000,
+          "description": "Define the resolution of the raster grid (in the unit of measurement defined by the coordinate reference system set below). A smaller grid cell size provides more detail, while a larger size generalizes the data.",
+          "exclusiveMaximum": 10000,
+          "exclusiveMinimum": 0,
+          "gt": 0,
+          "lt": 10000,
+          "title": "Custom Grid Cell Size",
+          "type": "number"
+        }
+      },
+      "title": "Customize",
+      "type": "object"
     }
   },
   "uiSchema": {
@@ -649,12 +1049,63 @@
         "force_point_geometry"
       ]
     },
+    "Process Patrols": {
+      "ui:order": [
+        "patrol_traj",
+        "traj_with_date"
+      ]
+    },
+    "events_filter": {
+      "ui:order": [
+        "bounding_box",
+        "filter_point_coords"
+      ]
+    },
+    "Patrol Effort Summary": {
+      "summary_table_df": {
+        "ui:order": [
+          "summary_params",
+          "groupby_cols"
+        ]
+      }
+    },
+    "Patrol Coverage Map": {
+      "ui:order": [
+        "coverage_meshgrid",
+        "grouped_coverage_density"
+      ],
+      "coverage_meshgrid": {
+        "ui:order": [
+          "auto_scale_or_custom_cell_size",
+          "crs"
+        ]
+      }
+    },
+    "Event Density Map": {
+      "event_meshgrid": {
+        "ui:order": [
+          "auto_scale_or_custom_cell_size",
+          "crs"
+        ]
+      }
+    },
+    "ui:order": [
+      "workflow_details",
+      "er_client_name",
+      "time_range",
+      "groupers",
+      "patrol_obs",
+      "events_data",
+      "base_map_defs",
+      "exclude_rangers",
+      "Process Patrols",
+      "events_filter",
+      "Patrol Effort Summary",
+      "Patrol Coverage Map",
+      "Event Density Map"
+    ],
     "Patrols & Events Map": {
       "events_filter": {
-        "ui:order": [
-          "bounding_box",
-          "filter_point_coords"
-        ],
         "filter_point_coords": {
           "items": {
             "ui:options": {
@@ -663,18 +1114,7 @@
           }
         }
       }
-    },
-    "ui:order": [
-      "workflow_details",
-      "er_client_name",
-      "time_range",
-      "patrol_obs",
-      "events_data",
-      "base_map_defs",
-      "exclude_rangers",
-      "Process Patrols",
-      "Patrols & Events Map"
-    ]
+    }
   },
   "additionalProperties": false
 }

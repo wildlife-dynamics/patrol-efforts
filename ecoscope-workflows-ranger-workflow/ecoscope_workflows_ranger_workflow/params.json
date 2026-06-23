@@ -68,6 +68,34 @@
       "description": "Choose the period of time to analyze.",
       "title": "Time Range"
     },
+    "groupers": {
+      "additionalProperties": false,
+      "properties": {
+        "groupers": {
+          "default": null,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ValueGrouper"
+              },
+              {
+                "$ref": "#/$defs/TemporalGrouper"
+              },
+              {
+                "$ref": "#/$defs/SpatialGrouper"
+              }
+            ],
+            "title": "Group by"
+          },
+          "title": " ",
+          "type": "array",
+          "description": "            Specify how the data should be grouped to create the views for your dashboard.\n            This field is optional; if left blank, all the data will appear in a single view.\n            "
+        }
+      },
+      "type": "object",
+      "required": [],
+      "title": "Dashboard Groupers"
+    },
     "patrol_obs": {
       "additionalProperties": false,
       "properties": {
@@ -165,17 +193,22 @@
           "default": [
             {
               "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
-              "opacity": 1
+              "opacity": 1,
+              "max_zoom": 20,
+              "min_zoom": 0
             },
             {
               "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-              "opacity": 0.5
+              "opacity": 0.5,
+              "max_zoom": 20,
+              "min_zoom": 0
             }
           ],
           "items": {
             "title": "Base Layer",
             "anyOf": [
               {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
                 "properties": {
                   "url": {
                     "default": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -200,6 +233,7 @@
                 "type": "object"
               },
               {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
                 "properties": {
                   "url": {
                     "default": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
@@ -224,6 +258,7 @@
                 "type": "object"
               },
               {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
                 "properties": {
                   "url": {
                     "default": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
@@ -248,6 +283,7 @@
                 "type": "object"
               },
               {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
                 "properties": {
                   "url": {
                     "default": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
@@ -272,30 +308,7 @@
                 "type": "object"
               },
               {
-                "properties": {
-                  "url": {
-                    "default": "https://tiles.arcgis.com/tiles/POUcpLYXNckpLjnY/arcgis/rest/services/landDx_basemap_tiles_mapservice/MapServer/tile/{z}/{y}/{x}",
-                    "title": "Preset Layer URL",
-                    "type": "string",
-                    "const": "https://tiles.arcgis.com/tiles/POUcpLYXNckpLjnY/arcgis/rest/services/landDx_basemap_tiles_mapservice/MapServer/tile/{z}/{y}/{x}",
-                    "enum": [
-                      "https://tiles.arcgis.com/tiles/POUcpLYXNckpLjnY/arcgis/rest/services/landDx_basemap_tiles_mapservice/MapServer/tile/{z}/{y}/{x}"
-                    ]
-                  },
-                  "opacity": {
-                    "default": 1,
-                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
-                    "ecoscope:advanced": true,
-                    "maximum": 1.0,
-                    "minimum": 0.0,
-                    "title": "Layer Opacity",
-                    "type": "number"
-                  }
-                },
-                "title": "LandDx",
-                "type": "object"
-              },
-              {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
                 "properties": {
                   "url": {
                     "default": "https://server.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}",
@@ -320,6 +333,7 @@
                 "type": "object"
               },
               {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
                 "properties": {
                   "url": {
                     "default": "https://example.tiles.com/{z}/{x}/{y}.png",
@@ -338,13 +352,13 @@
                     "type": "number"
                   },
                   "max_zoom": {
-                    "default": null,
+                    "default": 20,
                     "description": "Set the maximum zoom level to fetch tiles for.",
                     "title": "Custom Layer Max Zoom",
                     "type": "integer"
                   },
                   "min_zoom": {
-                    "default": null,
+                    "default": 0,
                     "description": "Set the minimum zoom level to fetch tiles for.",
                     "title": "Custom Layer Min Zoom",
                     "type": "integer"
@@ -408,6 +422,27 @@
       "type": "object",
       "title": "Relocations to Trajectory"
     },
+    "traj_with_date": {
+      "additionalProperties": false,
+      "properties": {
+        "column_prefix": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Column Prefix",
+          "description": "Custom prefix for generated columns (defaults to datetime_column name)."
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Add Patrol Date"
+    },
     "events_filter": {
       "additionalProperties": false,
       "properties": {
@@ -441,6 +476,107 @@
       "required": [],
       "type": "object",
       "title": "Filter Event Locations"
+    },
+    "summary_table_df": {
+      "additionalProperties": false,
+      "properties": {
+        "summary_params": {
+          "items": {
+            "$ref": "#/$defs/SummaryParam"
+          },
+          "title": "Summary Params",
+          "type": "array",
+          "description": "The parameters that define how to calculate summary statistics."
+        },
+        "groupby_cols": {
+          "default": null,
+          "items": {
+            "type": "string"
+          },
+          "title": "Groupby Cols",
+          "type": "array",
+          "description": "The columns to group by. If None, the summary is calculated for the entire DataFrame."
+        }
+      },
+      "required": [
+        "summary_params"
+      ],
+      "type": "object",
+      "title": "Summarize Patrol Effort"
+    },
+    "coverage_meshgrid": {
+      "additionalProperties": false,
+      "properties": {
+        "auto_scale_or_custom_cell_size": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AutoScaleGridCellSize"
+            },
+            {
+              "$ref": "#/$defs/CustomGridCellSize"
+            }
+          ],
+          "default": {
+            "auto_scale_or_custom": "Auto-scale"
+          },
+          "title": "Grid Cell Size",
+          "ecoscope:advanced": true
+        },
+        "crs": {
+          "default": "EPSG:3857",
+          "title": "Coordinate Reference System",
+          "type": "string",
+          "description": "The coordinate reference system in which to perform the calculation, must be a valid CRS authority code, for example ESRI:53042",
+          "ecoscope:advanced": true
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Coverage Meshgrid"
+    },
+    "grouped_coverage_density": {
+      "additionalProperties": false,
+      "properties": {
+        "sum_column": {
+          "default": null,
+          "title": "Sum Column",
+          "type": "string",
+          "description": "Sum values in this column per grid cell, rather than counting rows"
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Calculate Patrol Effort per Cell"
+    },
+    "event_meshgrid": {
+      "additionalProperties": false,
+      "properties": {
+        "auto_scale_or_custom_cell_size": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AutoScaleGridCellSize"
+            },
+            {
+              "$ref": "#/$defs/CustomGridCellSize"
+            }
+          ],
+          "default": {
+            "auto_scale_or_custom": "Auto-scale"
+          },
+          "title": "Grid Cell Size",
+          "ecoscope:advanced": true
+        },
+        "crs": {
+          "default": "EPSG:3857",
+          "title": "Coordinate Reference System",
+          "type": "string",
+          "description": "The coordinate reference system in which to perform the calculation, must be a valid CRS authority code, for example ESRI:53042",
+          "ecoscope:advanced": true
+        }
+      },
+      "required": [],
+      "type": "object",
+      "title": "Event Meshgrid"
     }
   },
   "$defs": {
@@ -483,6 +619,79 @@
         "utc"
       ],
       "title": "TimezoneInfo",
+      "type": "object"
+    },
+    "SpatialGrouper": {
+      "properties": {
+        "spatial_index_name": {
+          "title": "Spatial Regions",
+          "type": "string"
+        }
+      },
+      "required": [
+        "spatial_index_name"
+      ],
+      "title": "Spatial",
+      "type": "object"
+    },
+    "TemporalGrouper": {
+      "properties": {
+        "temporal_index": {
+          "oneOf": [
+            {
+              "const": "%Y",
+              "title": "Year (example: 2024)"
+            },
+            {
+              "const": "%B",
+              "title": "Month (example: September)"
+            },
+            {
+              "const": "%Y-%m",
+              "title": "Year and Month (example: 2023-01)"
+            },
+            {
+              "const": "%j",
+              "title": "Day of the year as a number (example: 365)"
+            },
+            {
+              "const": "%d",
+              "title": "Day of the month as a number (example: 31)"
+            },
+            {
+              "const": "%A",
+              "title": "Day of the week (example: Sunday)"
+            },
+            {
+              "const": "%H",
+              "title": "Hour (24-hour clock) as number (example: 22)"
+            },
+            {
+              "const": "%Y-%m-%d",
+              "title": "Date (example: 2025-01-31)"
+            }
+          ],
+          "title": "Time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "temporal_index"
+      ],
+      "title": "Time",
+      "type": "object"
+    },
+    "ValueGrouper": {
+      "properties": {
+        "index_name": {
+          "title": "Category",
+          "type": "string"
+        }
+      },
+      "required": [
+        "index_name"
+      ],
+      "title": "Category",
       "type": "object"
     },
     "TrajectorySegmentFilter": {
@@ -582,6 +791,127 @@
       ],
       "title": "Coordinate",
       "type": "object"
+    },
+    "SummaryParam": {
+      "properties": {
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "aggregator": {
+          "enum": [
+            "sum",
+            "count",
+            "min",
+            "max",
+            "mean",
+            "unique",
+            "nunique",
+            "median",
+            "night_day_ratio",
+            "merged_coverage_area",
+            "unmerged_coverage_area"
+          ],
+          "title": "Aggregator",
+          "type": "string"
+        },
+        "column": {
+          "default": null,
+          "title": "Column",
+          "type": "string"
+        },
+        "original_unit": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/Unit"
+            }
+          ],
+          "default": null,
+          "title": "Original Unit"
+        },
+        "new_unit": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/Unit"
+            }
+          ],
+          "default": null,
+          "title": "New Unit"
+        },
+        "decimal_places": {
+          "default": 2,
+          "title": "Decimal Places",
+          "type": "integer"
+        },
+        "swath_width_meters": {
+          "default": null,
+          "title": "Swath Width Meters",
+          "type": "number"
+        }
+      },
+      "required": [
+        "display_name",
+        "aggregator"
+      ],
+      "title": "SummaryParam",
+      "type": "object"
+    },
+    "Unit": {
+      "enum": [
+        "m",
+        "km",
+        "m\u00b2",
+        "km\u00b2",
+        "s",
+        "h",
+        "d",
+        "m/s",
+        "km/h"
+      ],
+      "title": "Unit",
+      "type": "string"
+    },
+    "AutoScaleGridCellSize": {
+      "properties": {
+        "auto_scale_or_custom": {
+          "const": "Auto-scale",
+          "default": "Auto-scale",
+          "ecoscope:advanced": true,
+          "enum": [
+            "Auto-scale"
+          ],
+          "title": "Grid Cell Size",
+          "type": "string"
+        }
+      },
+      "title": "Auto-scale",
+      "type": "object"
+    },
+    "CustomGridCellSize": {
+      "properties": {
+        "auto_scale_or_custom": {
+          "const": "Customize",
+          "default": "Customize",
+          "ecoscope:advanced": true,
+          "enum": [
+            "Customize"
+          ],
+          "title": "Grid Cell Size",
+          "type": "string"
+        },
+        "grid_cell_size": {
+          "default": 5000,
+          "description": "Define the resolution of the raster grid (in the unit of measurement defined by the coordinate reference system set below). A smaller grid cell size provides more detail, while a larger size generalizes the data.",
+          "exclusiveMaximum": 10000,
+          "exclusiveMinimum": 0,
+          "gt": 0,
+          "lt": 10000,
+          "title": "Custom Grid Cell Size",
+          "type": "number"
+        }
+      },
+      "title": "Customize",
+      "type": "object"
     }
   },
   "uiSchema": {
@@ -620,16 +950,40 @@
         "filter_point_coords"
       ]
     },
+    "summary_table_df": {
+      "ui:order": [
+        "summary_params",
+        "groupby_cols"
+      ]
+    },
+    "coverage_meshgrid": {
+      "ui:order": [
+        "auto_scale_or_custom_cell_size",
+        "crs"
+      ]
+    },
+    "event_meshgrid": {
+      "ui:order": [
+        "auto_scale_or_custom_cell_size",
+        "crs"
+      ]
+    },
     "ui:order": [
       "workflow_details",
       "er_client_name",
       "time_range",
+      "groupers",
       "patrol_obs",
       "events_data",
       "base_map_defs",
       "exclude_rangers",
       "patrol_traj",
-      "events_filter"
+      "traj_with_date",
+      "events_filter",
+      "summary_table_df",
+      "coverage_meshgrid",
+      "grouped_coverage_density",
+      "event_meshgrid"
     ]
   },
   "additionalProperties": false
