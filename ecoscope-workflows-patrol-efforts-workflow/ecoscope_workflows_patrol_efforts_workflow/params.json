@@ -456,7 +456,36 @@
       "properties": {
         "summary_params": {
           "items": {
-            "$ref": "#/$defs/SummaryParam"
+            "discriminator": {
+              "mapping": {
+                "count": "#/$defs/TallySummaryParam",
+                "max": "#/$defs/NumericSummaryParam",
+                "mean": "#/$defs/NumericSummaryParam",
+                "median": "#/$defs/NumericSummaryParam",
+                "merged_coverage_area": "#/$defs/CoverageSummaryParam",
+                "min": "#/$defs/NumericSummaryParam",
+                "night_day_ratio": "#/$defs/NightDayRatioSummaryParam",
+                "nunique": "#/$defs/TallySummaryParam",
+                "sum": "#/$defs/NumericSummaryParam",
+                "unique": "#/$defs/TallySummaryParam",
+                "unmerged_coverage_area": "#/$defs/CoverageSummaryParam"
+              },
+              "propertyName": "aggregator"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/TallySummaryParam"
+              },
+              {
+                "$ref": "#/$defs/NumericSummaryParam"
+              },
+              {
+                "$ref": "#/$defs/CoverageSummaryParam"
+              },
+              {
+                "$ref": "#/$defs/NightDayRatioSummaryParam"
+              }
+            ]
           },
           "title": "Summary Params",
           "type": "array",
@@ -766,31 +795,91 @@
       "title": "Coordinate",
       "type": "object"
     },
-    "SummaryParam": {
+    "CoverageSummaryParam": {
+      "description": "Ground area (km\u00b2) covered by buffering track segments. Has no column.",
       "properties": {
         "display_name": {
+          "description": "Column header shown in the summary table.",
           "title": "Display Name",
           "type": "string"
         },
         "aggregator": {
           "enum": [
-            "sum",
-            "count",
-            "min",
-            "max",
-            "mean",
-            "unique",
-            "nunique",
-            "median",
-            "night_day_ratio",
             "merged_coverage_area",
             "unmerged_coverage_area"
           ],
           "title": "Aggregator",
           "type": "string"
         },
-        "column": {
+        "swath_width_meters": {
           "default": null,
+          "description": "Full corridor width in meters (defaults to 500).",
+          "title": "Swath Width Meters",
+          "type": "number"
+        },
+        "decimal_places": {
+          "default": 2,
+          "title": "Decimal Places",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "display_name",
+        "aggregator"
+      ],
+      "title": "Area Covered Metric",
+      "type": "object"
+    },
+    "NightDayRatioSummaryParam": {
+      "description": "Ratio of night to day fixes. Has no column or units.",
+      "properties": {
+        "display_name": {
+          "description": "Column header shown in the summary table.",
+          "title": "Display Name",
+          "type": "string"
+        },
+        "aggregator": {
+          "const": "night_day_ratio",
+          "enum": [
+            "night_day_ratio"
+          ],
+          "title": "Aggregator",
+          "type": "string"
+        },
+        "decimal_places": {
+          "default": 2,
+          "title": "Decimal Places",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "display_name",
+        "aggregator"
+      ],
+      "title": "Night/Day Ratio Metric",
+      "type": "object"
+    },
+    "NumericSummaryParam": {
+      "description": "Numeric reduction (sum / min / max / mean / median) with optional unit conversion.",
+      "properties": {
+        "display_name": {
+          "description": "Column header shown in the summary table.",
+          "title": "Display Name",
+          "type": "string"
+        },
+        "aggregator": {
+          "enum": [
+            "sum",
+            "min",
+            "max",
+            "mean",
+            "median"
+          ],
+          "title": "Aggregator",
+          "type": "string"
+        },
+        "column": {
+          "description": "Column to aggregate.",
           "title": "Column",
           "type": "string"
         },
@@ -816,18 +905,45 @@
           "default": 2,
           "title": "Decimal Places",
           "type": "integer"
-        },
-        "swath_width_meters": {
-          "default": null,
-          "title": "Swath Width Meters",
-          "type": "number"
         }
       },
       "required": [
         "display_name",
-        "aggregator"
+        "aggregator",
+        "column"
       ],
-      "title": "SummaryParam",
+      "title": "Numeric Metric",
+      "type": "object"
+    },
+    "TallySummaryParam": {
+      "description": "Count-style metric (count / nunique / unique) over a single column.",
+      "properties": {
+        "display_name": {
+          "description": "Column header shown in the summary table.",
+          "title": "Display Name",
+          "type": "string"
+        },
+        "aggregator": {
+          "enum": [
+            "count",
+            "nunique",
+            "unique"
+          ],
+          "title": "Aggregator",
+          "type": "string"
+        },
+        "column": {
+          "description": "Column to aggregate.",
+          "title": "Column",
+          "type": "string"
+        }
+      },
+      "required": [
+        "display_name",
+        "aggregator",
+        "column"
+      ],
+      "title": "Count Metric",
       "type": "object"
     },
     "Unit": {

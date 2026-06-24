@@ -80,7 +80,7 @@ rjsf-overrides:
           type: spatial_feature_group
           depends_on: properties.er_client_name.properties.data_source.properties.name
 
-    base_map_defs.properties.base_maps.default:
+    "Map Configuration.properties.base_map_defs.properties.base_maps.default":
       - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
         opacity: 1.0
       - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
@@ -90,7 +90,10 @@ rjsf-overrides:
     "Patrol Effort Summary.properties.summary_table_df.properties.groupby_cols.title": "Aggregator"
     "Patrol Effort Summary.properties.summary_table_df.properties.groupby_cols.description": "Column to aggregate (group) summary rows by. Default: patrol subject (ranger). Other options: patrol_type__value, patrol_status."
     "Patrol Effort Summary.properties.summary_table_df.properties.groupby_cols.default": ["patrol_subject"]
-    "Patrol Effort Summary.properties.summary_table_df.properties.groupby_cols.items.enum": ["patrol_subject", "patrol_type__value", "patrol_status"]
+    "Patrol Effort Summary.properties.summary_table_df.properties.groupby_cols.items.oneOf":
+      - {const: "patrol_subject", title: "Patrol Subject"}
+      - {const: "patrol_type__value", title: "Patrol Type"}
+      - {const: "patrol_status", title: "Patrol Status"}
 
     # --- Configurable Summary Table: metric list (summary_params) ---
     "Patrol Effort Summary.properties.summary_table_df.properties.summary_params.title": "Summary Metrics"
@@ -123,18 +126,16 @@ rjsf-overrides:
         swath_width_meters: 500.0
         decimal_places: 1
 
-    # --- Patrols & Events Map: per-layer category colour selectors (classifier) ---
-    set_traj_color_column.description: "Colour the patrol tracks by the selected category."
-    set_traj_color_column.properties.var.title: "Colour Tracks By"
-    set_traj_color_column.properties.var.default: "patrol_subject"
-    set_traj_color_column.properties.var.oneOf:
+    # --- Map Configuration: per-layer category colour selectors (classifier) ---
+    "Map Configuration.properties.set_traj_color_column.properties.var.title": "Colour Tracks By"
+    "Map Configuration.properties.set_traj_color_column.properties.var.default": "patrol_subject"
+    "Map Configuration.properties.set_traj_color_column.properties.var.oneOf":
       - {const: "patrol_subject", title: "Patrol Subject"}
       - {const: "patrol_type__value", title: "Patrol Type"}
       - {const: "patrol_status", title: "Patrol Status"}
-    set_event_color_column.description: "Colour the event points by the selected category."
-    set_event_color_column.properties.var.title: "Colour Events By"
-    set_event_color_column.properties.var.default: "event_type"
-    set_event_color_column.properties.var.oneOf:
+    "Map Configuration.properties.set_event_color_column.properties.var.title": "Colour Events By"
+    "Map Configuration.properties.set_event_color_column.properties.var.default": "event_type"
+    "Map Configuration.properties.set_event_color_column.properties.var.oneOf":
       - {const: "event_type", title: "Event Type"}
       - {const: "event_category", title: "Event Category"}
 
@@ -249,18 +250,23 @@ workflow:
     partial:
       var: "Event Density Map"
 
-  # Per-layer category colour selectors for the Patrols & Events map.
-  - name: Track Colour Category
-    id: set_traj_color_column
-    task: set_string_var
+  # All map configuration in one card: the per-layer colour-category selectors
+  # for the Patrols & Events map plus the shared base layers.
+  - title: Map Configuration
+    type: task-group
+    description: "Colour the Patrols & Events map layers and choose the base layers."
+    tasks:
+      - name: Track Colour Category
+        id: set_traj_color_column
+        task: set_string_var
 
-  - name: Event Colour Category
-    id: set_event_color_column
-    task: set_string_var
+      - name: Event Colour Category
+        id: set_event_color_column
+        task: set_string_var
 
-  - name: Map Base Layers
-    id: base_map_defs
-    task: set_base_maps
+      - name: Map Base Layers
+        id: base_map_defs
+        task: set_base_maps
 
   # ---------- Process Patrols ----------
   - title: Process Patrols
