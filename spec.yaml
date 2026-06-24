@@ -145,8 +145,14 @@ rjsf-overrides:
     "Patrol Coverage Map.properties.grouped_coverage_density.properties.sum_column.default": "timespan_seconds"
     "Patrol Coverage Map.properties.grouped_coverage_density.properties.sum_column.enum": ["timespan_seconds", "dist_meters"]
 
+    # --- Filter Data: combined filter card (applies to tracks + events) ---
+    "Filter Data.properties.patrol_filters.title": ""
+    "Filter Data.properties.patrol_filters.properties.bounding_box.description": "Only include patrol tracks and events whose coordinates fall inside this bounding box."
+    "Filter Data.properties.patrol_filters.properties.filter_point_coords.description": "Exclude tracks and events recorded at these exact coordinates (e.g. known bad GPS fixes)."
+    "Filter Data.properties.patrol_filters.properties.trajectory_segment_filter.description": "Drop trajectory segments outside these length / time / speed bounds (applies to the patrol tracks only)."
+
   uiSchema:
-    Patrols & Events Map.events_filter.filter_point_coords.items.ui:options.label: false
+    Filter Data.patrol_filters.filter_point_coords.items.ui:options.label: false
 
 task-instance-defaults:
   skipif:
@@ -268,6 +274,34 @@ workflow:
         id: base_map_defs
         task: set_base_maps
 
+  # ---------- Filter Data (shared: patrol tracks + events) ----------
+  - title: Filter Data
+    type: task-group
+    description: "Spatial and trajectory filters applied to BOTH the patrol tracks and the events."
+    tasks:
+      - name: Filters
+        id: patrol_filters
+        task: set_traj_filters
+
+  # Split the combined filter config into the pieces each consumer needs.
+  - name: Split Bounding Box
+    id: bounding_box
+    task: get_bounding_box
+    partial:
+      filters: ${{ workflow.patrol_filters.return }}
+
+  - name: Split Point Coordinates
+    id: filter_point_coords
+    task: get_filter_point_coords
+    partial:
+      filters: ${{ workflow.patrol_filters.return }}
+
+  - name: Split Segment Filter
+    id: segment_filter
+    task: get_segment_filter
+    partial:
+      filters: ${{ workflow.patrol_filters.return }}
+
   # ---------- Process Patrols ----------
   - title: Process Patrols
     type: task-group
@@ -284,38 +318,25 @@ workflow:
             - patrol_end_time
             - fixtime
 
-      - name: Transform Observations to Relocations
-        id: patrol_reloc
-        task: process_relocations
+      # Coordinate/bounding-box filter from the shared Filter Data card.
+      - name: Filter Patrol Observations
+        id: filter_patrol_obs
+        task: apply_reloc_coord_filter
         partial:
-          observations: ${{ workflow.convert_patrols_tz.return }}
-          relocs_columns:
-            - patrol_id
-            - patrol_start_time
-            - patrol_end_time
-            - patrol_type__value
-            - patrol_type__display
-            - patrol_serial_number
-            - patrol_status
-            - patrol_subject
-            - groupby_col
-            - fixtime
-            - junk_status
-            - extra__source
-            - geometry
-          filter_point_coords:
-            - x: 180.0
-              y: 90.0
-            - x: 0.0
-              y: 0.0
-            - x: 1.0
-              y: 1.0
+          df: ${{ workflow.convert_patrols_tz.return }}
+          bounding_box: ${{ workflow.bounding_box.return }}
+          filter_point_coords: ${{ workflow.filter_point_coords.return }}
+          roi_gdf: null
+          roi_name: null
+          reset_index: false
 
+      # Trajectory segment filter from the same shared Filter Data card.
       - name: Relocations to Trajectory
         id: patrol_traj
         task: relocations_to_trajectory
         partial:
-          relocations: ${{ workflow.patrol_reloc.return }}
+          relocations: ${{ workflow.filter_patrol_obs.return }}
+          trajectory_segment_filter: ${{ workflow.segment_filter.return }}
 
       - name: Rename Trajectory Columns
         id: traj_rename_cols
@@ -333,6 +354,9 @@ workflow:
 
       # Patrol Days = nunique(segment_start_date) per category in summarize_df =
       # distinct calendar days with patrol MOVEMENT ("active days").
+      # column_prefix is bound (not user-facing): with the default prefix the
+      # generated column is deterministically `segment_start_date`, which the
+      # "Patrol Days" metric (nunique) references.
       - name: Add Patrol Date
         id: traj_with_date
         task: ecoscope_workflows_ext_custom.tasks.transformation.decompose_datetime
@@ -342,6 +366,7 @@ workflow:
           components:
             - date
           remove_source: false
+          column_prefix: null
 
       # Colour tracks by the chosen category BEFORE split so colours stay consistent across group views.
       - name: Tracks Colormap
@@ -367,11 +392,15 @@ workflow:
           columns:
             - time
 
+      # Same bounding-box / point-coordinate filter as the patrol tracks,
+      # from the shared Filter Data card.
       - name: Filter Event Locations
         id: events_filter
         task: apply_reloc_coord_filter
         partial:
           df: ${{ workflow.convert_events_tz.return }}
+          bounding_box: ${{ workflow.bounding_box.return }}
+          filter_point_coords: ${{ workflow.filter_point_coords.return }}
           roi_gdf: null
           roi_name: null
           reset_index: true

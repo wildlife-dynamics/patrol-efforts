@@ -34,9 +34,6 @@ from ecoscope.platform.tasks.io import (
     unpack_events_from_patrols_df_and_combined_params as unpack_events_from_patrols_df_and_combined_params,
 )
 from ecoscope.platform.tasks.preprocessing import (
-    process_relocations as process_relocations,
-)
-from ecoscope.platform.tasks.preprocessing import (
     relocations_to_trajectory as relocations_to_trajectory,
 )
 from ecoscope.platform.tasks.results import (
@@ -79,6 +76,18 @@ from ecoscope.platform.tasks.transformation import (
 )
 from ecoscope.platform.tasks.transformation import map_columns as map_columns
 from ecoscope.platform.tasks.transformation import sort_values as sort_values
+from ecoscope_workflows_ext_custom.tasks.config import (
+    get_bounding_box as get_bounding_box,
+)
+from ecoscope_workflows_ext_custom.tasks.config import (
+    get_filter_point_coords as get_filter_point_coords,
+)
+from ecoscope_workflows_ext_custom.tasks.config import (
+    get_segment_filter as get_segment_filter,
+)
+from ecoscope_workflows_ext_custom.tasks.config import (
+    set_traj_filters as set_traj_filters,
+)
 from ecoscope_workflows_ext_custom.tasks.transformation import (
     decompose_datetime as decompose_datetime,
 )
@@ -410,6 +419,74 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
+    patrol_filters = (
+        task(set_traj_filters)
+        .validate()
+        .set_task_instance_id("patrol_filters")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(**(params.get("patrol_filters") or {}))
+        .call()
+    )
+
+    bounding_box = (
+        task(get_bounding_box)
+        .validate()
+        .set_task_instance_id("bounding_box")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(filters=patrol_filters, **(params.get("bounding_box") or {}))
+        .call()
+    )
+
+    filter_point_coords = (
+        task(get_filter_point_coords)
+        .validate()
+        .set_task_instance_id("filter_point_coords")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(filters=patrol_filters, **(params.get("filter_point_coords") or {}))
+        .call()
+    )
+
+    segment_filter = (
+        task(get_segment_filter)
+        .validate()
+        .set_task_instance_id("segment_filter")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(filters=patrol_filters, **(params.get("segment_filter") or {}))
+        .call()
+    )
+
     convert_patrols_tz = (
         task(convert_values_to_timezone)
         .validate()
@@ -432,10 +509,10 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
-    patrol_reloc = (
-        task(process_relocations)
+    filter_patrol_obs = (
+        task(apply_reloc_coord_filter)
         .validate()
-        .set_task_instance_id("patrol_reloc")
+        .set_task_instance_id("filter_patrol_obs")
         .handle_errors()
         .with_tracing()
         .skipif(
@@ -446,28 +523,13 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            observations=convert_patrols_tz,
-            relocs_columns=[
-                "patrol_id",
-                "patrol_start_time",
-                "patrol_end_time",
-                "patrol_type__value",
-                "patrol_type__display",
-                "patrol_serial_number",
-                "patrol_status",
-                "patrol_subject",
-                "groupby_col",
-                "fixtime",
-                "junk_status",
-                "extra__source",
-                "geometry",
-            ],
-            filter_point_coords=[
-                {"x": 180.0, "y": 90.0},
-                {"x": 0.0, "y": 0.0},
-                {"x": 1.0, "y": 1.0},
-            ],
-            **(params.get("patrol_reloc") or {}),
+            df=convert_patrols_tz,
+            bounding_box=bounding_box,
+            filter_point_coords=filter_point_coords,
+            roi_gdf=None,
+            roi_name=None,
+            reset_index=False,
+            **(params.get("filter_patrol_obs") or {}),
         )
         .call()
     )
@@ -485,7 +547,11 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             ],
             unpack_depth=1,
         )
-        .partial(relocations=patrol_reloc, **(params.get("patrol_traj") or {}))
+        .partial(
+            relocations=filter_patrol_obs,
+            trajectory_segment_filter=segment_filter,
+            **(params.get("patrol_traj") or {}),
+        )
         .call()
     )
 
@@ -536,6 +602,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             datetime_column="segment_start",
             components=["date"],
             remove_source=False,
+            column_prefix=None,
             **(params.get("traj_with_date") or {}),
         )
         .call()
@@ -618,6 +685,8 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             df=convert_events_tz,
+            bounding_box=bounding_box,
+            filter_point_coords=filter_point_coords,
             roi_gdf=None,
             roi_name=None,
             reset_index=True,

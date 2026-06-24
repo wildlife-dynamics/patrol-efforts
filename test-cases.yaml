@@ -37,8 +37,6 @@ base:
         - {display_name: "Unmerged Area Covered (km²)", aggregator: unmerged_coverage_area, swath_width_meters: 500.0, decimal_places: 1}
     grouped_coverage_density:
       sum_column: timespan_seconds
-    events_filter:
-      filter_point_coords: []
     base_map_defs:
       base_maps:
         - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
@@ -83,8 +81,6 @@ base:
 #         - {display_name: "Unmerged Area Covered (km²)", aggregator: unmerged_coverage_area, swath_width_meters: 500.0, decimal_places: 1}
 #     grouped_coverage_density:
 #       sum_column: timespan_seconds
-#     events_filter:
-#       filter_point_coords: []
 #     base_map_defs:
 #       base_maps:
 #         - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
