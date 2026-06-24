@@ -153,6 +153,19 @@ rjsf-overrides:
 
   uiSchema:
     Filter Data.patrol_filters.filter_point_coords.items.ui:options.label: false
+    # Render the Map Configuration card AFTER Patrol Effort Summary, even though
+    # its colour-selector tasks must be declared earlier (before split_groups).
+    ui:order:
+      - workflow_details
+      - er_client_name
+      - time_range
+      - Patrol and Event Types
+      - groupers
+      - Filter Data
+      - Patrol Effort Summary
+      - Map Configuration
+      - Patrol Coverage Map
+      - Event Density Map
 
 task-instance-defaults:
   skipif:
@@ -257,7 +270,9 @@ workflow:
       var: "Event Density Map"
 
   # All map configuration in one card: the per-layer colour-category selectors
-  # for the Patrols & Events map plus the shared base layers.
+  # for the Patrols & Events map plus the shared base layers. Declared here (the
+  # colour selectors must precede split_groups in the DAG); the form renders this
+  # card AFTER Patrol Effort Summary via the uiSchema ui:order below.
   - title: Map Configuration
     type: task-group
     description: "Colour the Patrols & Events map layers and choose the base layers."
