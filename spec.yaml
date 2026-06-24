@@ -1,4 +1,4 @@
-id: ranger
+id: patrol_efforts
 
 requirements:
   # DEV MODE — developing the summarize_df coverage aggregators +

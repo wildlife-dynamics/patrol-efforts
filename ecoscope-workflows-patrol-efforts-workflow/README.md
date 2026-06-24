@@ -5,8 +5,8 @@
 
 ```yaml
 # fingerprint:
-artifacts_sha256_basic: 72e086e329aee4f5ef47c920886d21847165d9fe21ff93e92f2c2ae48c100403
-artifacts_sha256_strict: a60b563cf45c555e6d00f11f4456882b355d7bab360779dcd2e1fb3d9e07c665
+artifacts_sha256_basic: f3c11f0768343d21de72a3bf54a832f1360236d0689607af0f4c9acd3b50db53
+artifacts_sha256_strict: c0a1561b1b855e124cc3aea448427a5ae50bc24c28b79cea69fbef1c169c77b3
 installed_requirements:
 - channel: conda-forge
   name: python
@@ -36,10 +36,10 @@ installed_requirements:
   name: setuptools
   version: {version: ==80.10.2}
 params_sha256: 161179de8378d8abf8d05f54b78f0dcce7df455d55802a69d41ac88f59143667
-spec_sha256: fa46a0a2ca6feaad38ead1b0d92377a585beb8c88f718874e795862287ed8841
+spec_sha256: 3426aa11dd1fa12019cb6f1dc83803d0a7680feb123a1d33861084f172c29ef0
 
 ```
 
-# ecoscope-workflows-ranger-workflow
+# ecoscope-workflows-patrol-efforts-workflow
 
 ![](graph.png)
