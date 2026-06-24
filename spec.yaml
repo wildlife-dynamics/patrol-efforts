@@ -15,15 +15,13 @@ requirements:
     version: "3.12.*"
   # Channel-bearing conda req so the discovery/runtime solve registers the
   # repo.prefix.dev alias and can resolve the auto-injected wt-task / wt-runner.
-  # With both packages below as path-only, no requirement would otherwise carry
-  # this channel and the solve fails with "No candidates were found for wt-task".
   - name: wt-task
     version: ">=0.1.3,<1.0.0"
     channel: https://repo.prefix.dev/ecoscope-workflows/
   # Geospatial / scientific native stack provided by conda (mirrors the
   # ecoscope-dev workspace) so the editable ecoscope's heavy deps (pyproj,
   # shapely, gdal, proj, geos via geopandas/rasterio) are prebuilt binaries
-  # rather than source-built by uv (pyproj has no PROJ_DIR in the build env).
+  # rather than source-built by uv.
   - name: numpy
     version: ">=2,<2.1"
     channel: conda-forge
@@ -62,34 +60,35 @@ requirements:
 
 rjsf-overrides:
   properties:
-    patrol_obs.properties.patrol_types.ecoscope:transform:
+    # Patrols and their events are fetched together (one combined params object).
+    "Patrol and Event Types.properties.er_patrol_and_events_params.properties.patrol_types.ecoscope:transform":
       - transformer: EarthRangerEnumResolver
         transformer_kws:
           type: patrol_type
           depends_on: properties.er_client_name.properties.data_source.properties.name
-    events_data.properties.event_types.ecoscope:transform:
+    "Patrol and Event Types.properties.er_patrol_and_events_params.properties.event_types.ecoscope:transform":
       - transformer: EarthRangerEnumResolver
         transformer_kws:
           type: event_type
           depends_on: properties.er_client_name.properties.data_source.properties.name
+    "Patrol and Event Types.properties.er_patrol_and_events_params.properties.patrol_types.description": "Specify the patrol type(s) to analyze (optional). Leave empty to analyze all patrol types."
+    "Patrol and Event Types.properties.er_patrol_and_events_params.properties.event_types.description": "Specify the event type(s) to map (optional). Leave empty to include all event types reported during the selected patrols."
+
     groupers.properties.groupers.ecoscope:transform:
       - transformer: EarthRangerEnumResolver
         transformer_kws:
           type: spatial_feature_group
           depends_on: properties.er_client_name.properties.data_source.properties.name
+
     base_map_defs.properties.base_maps.default:
       - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
         opacity: 1.0
       - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
         opacity: 0.5
-    exclude_rangers.properties.vars.title: "Names to Exclude"
-    exclude_rangers.properties.vars.description: "Optional. Ranger names to exclude from the summary table and the map. Names must match the EarthRanger subject name (patrols) or user display name (events) exactly; unmatched entries are ignored."
-    exclude_rangers.properties.vars.default: []
-    exclude_rangers.properties.vars.ecoscope:advanced: true
 
     # --- Configurable Summary Table: category column (groupby_cols) ---
-    "Patrol Effort Summary.properties.summary_table_df.properties.groupby_cols.title": "Category Column"
-    "Patrol Effort Summary.properties.summary_table_df.properties.groupby_cols.description": "Column to group summary rows by. Default: patrol subject (ranger). Other options: patrol_type__value, patrol_status."
+    "Patrol Effort Summary.properties.summary_table_df.properties.groupby_cols.title": "Aggregator"
+    "Patrol Effort Summary.properties.summary_table_df.properties.groupby_cols.description": "Column to aggregate (group) summary rows by. Default: patrol subject (ranger). Other options: patrol_type__value, patrol_status."
     "Patrol Effort Summary.properties.summary_table_df.properties.groupby_cols.default": ["patrol_subject"]
     "Patrol Effort Summary.properties.summary_table_df.properties.groupby_cols.items.enum": ["patrol_subject", "patrol_type__value", "patrol_status"]
 
@@ -123,6 +122,21 @@ rjsf-overrides:
         aggregator: unmerged_coverage_area
         swath_width_meters: 500.0
         decimal_places: 1
+
+    # --- Patrols & Events Map: per-layer category colour selectors (classifier) ---
+    set_traj_color_column.description: "Colour the patrol tracks by the selected category."
+    set_traj_color_column.properties.var.title: "Colour Tracks By"
+    set_traj_color_column.properties.var.default: "patrol_subject"
+    set_traj_color_column.properties.var.oneOf:
+      - {const: "patrol_subject", title: "Patrol Subject"}
+      - {const: "patrol_type__value", title: "Patrol Type"}
+      - {const: "patrol_status", title: "Patrol Status"}
+    set_event_color_column.description: "Colour the event points by the selected category."
+    set_event_color_column.properties.var.title: "Colour Events By"
+    set_event_color_column.properties.var.default: "event_type"
+    set_event_color_column.properties.var.oneOf:
+      - {const: "event_type", title: "Event Type"}
+      - {const: "event_category", title: "Event Category"}
 
     # --- Coverage map weighting (time vs distance) ---
     "Patrol Coverage Map.properties.grouped_coverage_density.properties.sum_column.title": "Coverage Weighting"
@@ -161,38 +175,55 @@ workflow:
     partial:
       time_range: ${{ workflow.time_range.return }}
 
+  # ---------- Data Fetching (patrols + their events, together) ----------
+  - title: Patrol and Event Types
+    type: task-group
+    description: "Fetch patrols and the events reported during them in one combined query."
+    tasks:
+      - name: Patrol and Event Params
+        id: er_patrol_and_events_params
+        task: set_patrols_and_patrol_events_params
+        partial:
+          client: ${{ workflow.er_client_name.return }}
+          time_range: ${{ workflow.time_range.return }}
+          include_patrol_details: true
+          raise_on_empty: false
+          truncate_to_time_range: true
+          include_null_geometry: true
+          sub_page_size: 100
+
+      - name: Prefetch Patrols
+        id: prefetch_patrols
+        task: get_patrols_from_combined_params
+        partial:
+          combined_params: ${{ workflow.er_patrol_and_events_params.return }}
+
+      - name: Get Patrol Observations
+        id: patrol_obs
+        task: get_patrol_observations_from_patrols_df_and_combined_params
+        partial:
+          patrols_df: ${{ workflow.prefetch_patrols.return }}
+          combined_params: ${{ workflow.er_patrol_and_events_params.return }}
+
+      - name: Unpack Patrol Events
+        id: patrol_events
+        task: unpack_events_from_patrols_df_and_combined_params
+        partial:
+          patrols_df: ${{ workflow.prefetch_patrols.return }}
+          combined_params: ${{ workflow.er_patrol_and_events_params.return }}
+
+      - name: Resolve Event Type Display Names
+        id: event_type_display_names
+        task: get_event_type_display_names_from_events
+        partial:
+          client: ${{ workflow.er_client_name.return }}
+          events_gdf: ${{ workflow.patrol_events.return }}
+          append_category_names: "duplicates"
+
+  # Dashboard groupers — defined AFTER the data fetch (default [] -> single view).
   - name: Dashboard Groupers
     id: groupers
-    task: set_groupers          # default [] -> single "{}" view (no split); user can add groupers
-
-  # ---------- Data Fetching ----------
-  - name: Get Patrol Observations
-    id: patrol_obs
-    task: get_patrol_observations
-    partial:
-      client: ${{ workflow.er_client_name.return }}
-      time_range: ${{ workflow.time_range.return }}
-      include_patrol_details: true
-      raise_on_empty: false
-      sub_page_size: null
-
-  - name: Get Events
-    id: events_data
-    task: get_events
-    partial:
-      client: ${{ workflow.er_client_name.return }}
-      time_range: ${{ workflow.time_range.return }}
-      event_columns:
-        - id
-        - time
-        - event_type
-        - event_category
-        - reported_by
-        - serial_number
-        - geometry
-      raise_on_empty: false
-      include_null_geometry: true
-      include_display_values: true
+    task: set_groupers
 
   - name: Summary Table Title
     id: set_summary_title
@@ -218,13 +249,18 @@ workflow:
     partial:
       var: "Event Density Map"
 
+  # Per-layer category colour selectors for the Patrols & Events map.
+  - name: Track Colour Category
+    id: set_traj_color_column
+    task: set_string_var
+
+  - name: Event Colour Category
+    id: set_event_color_column
+    task: set_string_var
+
   - name: Map Base Layers
     id: base_map_defs
     task: set_base_maps
-
-  - name: Exclude Rangers
-    id: exclude_rangers
-    task: set_list_of_string_vars
 
   # ---------- Process Patrols ----------
   - title: Process Patrols
@@ -289,96 +325,67 @@ workflow:
             extra__patrol_status: patrol_status
           raise_if_not_found: false   # patrol_type__value / patrol_status only needed if used as category
 
-      - name: Drop Excluded Rangers from Patrols
-        id: traj_exclude_rangers
-        task: exclude_row_values
-        partial:
-          df: ${{ workflow.traj_rename_cols.return }}
-          column: patrol_subject
-          values: ${{ workflow.exclude_rangers.return }}
-
       # Patrol Days = nunique(segment_start_date) per category in summarize_df =
-      # distinct calendar days with patrol MOVEMENT ("active days"). segment_start
-      # is a per-GPS-segment timestamp, so a multi-day patrol counts as multiple
-      # days (intended). decompose_datetime("date") -> column "segment_start_date".
+      # distinct calendar days with patrol MOVEMENT ("active days").
       - name: Add Patrol Date
         id: traj_with_date
         task: ecoscope_workflows_ext_custom.tasks.transformation.decompose_datetime
         partial:
-          df: ${{ workflow.traj_exclude_rangers.return }}
+          df: ${{ workflow.traj_rename_cols.return }}
           datetime_column: segment_start
           components:
             - date
           remove_source: false
 
+      # Colour tracks by the chosen category BEFORE split so colours stay consistent across group views.
+      - name: Tracks Colormap
+        id: traj_colormap
+        task: apply_color_map
+        partial:
+          df: ${{ workflow.traj_with_date.return }}
+          input_column_name: ${{ workflow.set_traj_color_column.return }}
+          colormap: ["#FF9600", "#F23B0E", "#A100CB", "#F04564", "#03421A", "#3089FF", "#E26FFF", "#8C1700", "#002960", "#FFD000", "#B62879", "#680078", "#005A56", "#0056C7", "#331878", "#E76826"]
+          output_column_name: patrol_traj_colormap
+
   # ---------- Process Events ----------
   - title: Process Events
     type: task-group
-    description: "Convert event times, extract reporter, drop reporterless events."
+    description: "Convert patrol-event times and colour them by the chosen category."
     tasks:
       - name: Convert Events to Timezone
         id: convert_events_tz
         task: convert_values_to_timezone
         partial:
-          df: ${{ workflow.events_data.return }}
+          df: ${{ workflow.event_type_display_names.return }}
           timezone: ${{ workflow.get_timezone.return }}
           columns:
             - time
 
-      - name: Extract Reported By Name
-        id: extract_reported_by
-        task: extract_value_from_json_column
+      - name: Filter Event Locations
+        id: events_filter
+        task: apply_reloc_coord_filter
         partial:
           df: ${{ workflow.convert_events_tz.return }}
-          column_name: reported_by
-          field_name_options:
-            - name
-          output_type: str
-          output_column_name: reported_by_name
-
-      - name: Drop Events Without a Reporter
-        id: events_with_reporter
-        task: filter_df
-        partial:
-          df: ${{ workflow.extract_reported_by.return }}
-          column_name: reported_by_name
-          op: ne
-          value: "None"
+          roi_gdf: null
+          roi_name: null
           reset_index: true
 
-      - name: Drop Excluded Rangers from Events
-        id: events_exclude_rangers
-        task: exclude_row_values
+      # Colour events by the chosen category BEFORE split so colours stay consistent across group views.
+      - name: Events Colormap
+        id: events_colormap
+        task: apply_color_map
         partial:
-          df: ${{ workflow.events_with_reporter.return }}
-          column: reported_by_name
-          values: ${{ workflow.exclude_rangers.return }}
+          df: ${{ workflow.events_filter.return }}
+          input_column_name: ${{ workflow.set_event_color_column.return }}
+          colormap: tab20b
+          output_column_name: event_type_colormap
 
-  # ---------- Shared splits + event colormap ----------
-  - name: Filter Event Locations
-    id: events_filter
-    task: apply_reloc_coord_filter
-    partial:
-      df: ${{ workflow.events_exclude_rangers.return }}
-      roi_gdf: null
-      roi_name: null
-      reset_index: true
-
-  # Colormap BEFORE split so event-type colors stay consistent across group views.
-  - name: Events Colormap
-    id: events_colormap
-    task: apply_color_map
-    partial:
-      df: ${{ workflow.events_filter.return }}
-      input_column_name: event_type
-      colormap: tab20b
-      output_column_name: event_type_colormap
-
+  # ---------- Shared splits ----------
   - name: Split Patrol Tracks by Group
     id: split_traj_groups
     task: split_groups
     partial:
-      df: ${{ workflow.traj_with_date.return }}
+      df: ${{ workflow.traj_colormap.return }}
       groupers: ${{ workflow.groupers.return }}
 
   - name: Split Events by Group
@@ -391,13 +398,8 @@ workflow:
   # ---------- Patrol Effort Summary (configurable, grouped) ----------
   - title: Patrol Effort Summary
     type: task-group
-    description: "Per-category patrol metrics. Choose the category column and which metrics to show."
+    description: "Per-category patrol metrics. Choose the aggregator column and which metrics to show."
     tasks:
-      # groupby_cols + summary_params are NOT in partial -> user-editable via the
-      # form. Their defaults live in rjsf-overrides and must also be supplied in
-      # test-cases.yaml (summary_params is a required arg). summarize_df receives
-      # the trajectory GeoDataFrame so the coverage aggregators can buffer
-      # geometry per group.
       - name: Summarize Patrol Effort
         id: summary_table_df
         task: summarize_df
@@ -407,7 +409,6 @@ workflow:
           argnames: df
           argvalues: ${{ workflow.split_traj_groups.return }}
 
-      # No-op rename when category != patrol_subject (raise_if_not_found: false).
       - name: Rename Category Key
         id: summary_rename
         task: map_columns
@@ -467,8 +468,11 @@ workflow:
   # ---------- Patrols & Events Map (grouped tracks + event points) ----------
   - title: Patrols & Events Map
     type: task-group
-    description: "Patrol tracks (uniform grey) overlaid with event points (coloured by type)."
+    description: "Patrol tracks and event points, each coloured by a chosen category."
     tasks:
+      # Rename DISPLAY-only columns. The colour-category columns (patrol_subject /
+      # patrol_type__value / patrol_status) are left raw so the chosen one is
+      # still present for the legend label_column lookup.
       - name: Rename Track Columns for Display
         id: traj_display_rename
         task: map_columns
@@ -476,7 +480,6 @@ workflow:
           drop_columns: []
           retain_columns: []
           rename_columns:
-            patrol_subject: "Patrol Subject"
             segment_start: "Start"
             speed_kmhr: "Speed (kph)"
           raise_if_not_found: false
@@ -494,21 +497,22 @@ workflow:
             - all_geometry_are_none
         partial:
           layer_style:
-            get_color: [80, 80, 80]
-            color_column: null
+            color_column: patrol_traj_colormap
             get_width: 3
             width_units: pixels
             cap_rounded: true
             opacity: 1
-          legend: null
-          tooltip_columns:
-            - "Patrol Subject"
-            - "Start"
-            - "Speed (kph)"
+          legend:
+            label_column: ${{ workflow.set_traj_color_column.return }}
+            color_column: patrol_traj_colormap
+          tooltip_columns: ["patrol_subject", "Start", "Speed (kph)"]
         mapvalues:
           argnames: geodataframe
           argvalues: ${{ workflow.traj_display_rename.return }}
 
+      # Rename DISPLAY-only columns. The colour-category columns (event_type /
+      # event_category) are left raw so the chosen one is still present for the
+      # legend label_column lookup.
       - name: Rename Event Columns for Display
         id: events_display_rename
         task: map_columns
@@ -516,10 +520,7 @@ workflow:
           drop_columns: []
           retain_columns: []
           rename_columns:
-            serial_number: "Event Serial"
             time: "Event Time"
-            event_type_display: "Event Type"
-            reported_by_name: "Reported By"
           raise_if_not_found: false
         mapvalues:
           argnames: df
@@ -538,13 +539,9 @@ workflow:
             fill_color_column: event_type_colormap
             get_radius: 5
           legend:
-            label_column: "Event Type"
+            label_column: ${{ workflow.set_event_color_column.return }}
             color_column: event_type_colormap
-          tooltip_columns:
-            - "Event Serial"
-            - "Event Time"
-            - "Event Type"
-            - "Reported By"
+          tooltip_columns: ["Event Time", "event_type"]
         mapvalues:
           argnames: geodataframe
           argvalues: ${{ workflow.events_display_rename.return }}
@@ -572,8 +569,8 @@ workflow:
           north_arrow_style:
             placement: top-left
           legend_style:
-            title: "Event Type"
-            format_title: false
+            title: "Tracks / Events"
+            format_title: true
             placement: bottom-right
           static: false
           max_zoom: 20
@@ -615,7 +612,6 @@ workflow:
     type: task-group
     description: "Grid heatmap of patrol effort, weighted by total time or distance per cell."
     tasks:
-      # One meshgrid over the full track extent -> consistent grid across group views.
       - name: Coverage Meshgrid
         id: coverage_meshgrid
         task: create_meshgrid
@@ -631,8 +627,7 @@ workflow:
       - name: Calculate Patrol Effort per Cell
         id: grouped_coverage_density
         task: calculate_feature_density
-        # sum_column is NOT in partial -> user-facing (Coverage Weighting dropdown);
-        # default + enum live in rjsf-overrides, value supplied via test-cases.yaml.
+        # sum_column is NOT in partial -> user-facing (Coverage Weighting dropdown).
         partial:
           meshgrid: ${{ workflow.coverage_meshgrid.return }}
           geometry_type: line

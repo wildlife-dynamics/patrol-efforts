@@ -7,9 +7,6 @@ from ecoscope.platform.tasks.analysis import (
 )
 from ecoscope.platform.tasks.analysis import create_meshgrid as create_meshgrid
 from ecoscope.platform.tasks.analysis import summarize_df as summarize_df
-from ecoscope.platform.tasks.config import (
-    set_list_of_string_vars as set_list_of_string_vars,
-)
 from ecoscope.platform.tasks.config import set_string_var as set_string_var
 from ecoscope.platform.tasks.config import set_workflow_details as set_workflow_details
 from ecoscope.platform.tasks.filter import (
@@ -19,12 +16,23 @@ from ecoscope.platform.tasks.filter import set_time_range as set_time_range
 from ecoscope.platform.tasks.groupby import groupbykey as groupbykey
 from ecoscope.platform.tasks.groupby import set_groupers as set_groupers
 from ecoscope.platform.tasks.groupby import split_groups as split_groups
-from ecoscope.platform.tasks.io import get_events as get_events
 from ecoscope.platform.tasks.io import (
-    get_patrol_observations as get_patrol_observations,
+    get_event_type_display_names_from_events as get_event_type_display_names_from_events,
+)
+from ecoscope.platform.tasks.io import (
+    get_patrol_observations_from_patrols_df_and_combined_params as get_patrol_observations_from_patrols_df_and_combined_params,
+)
+from ecoscope.platform.tasks.io import (
+    get_patrols_from_combined_params as get_patrols_from_combined_params,
 )
 from ecoscope.platform.tasks.io import persist_text as persist_text
 from ecoscope.platform.tasks.io import set_er_connection as set_er_connection
+from ecoscope.platform.tasks.io import (
+    set_patrols_and_patrol_events_params as set_patrols_and_patrol_events_params,
+)
+from ecoscope.platform.tasks.io import (
+    unpack_events_from_patrols_df_and_combined_params as unpack_events_from_patrols_df_and_combined_params,
+)
 from ecoscope.platform.tasks.preprocessing import (
     process_relocations as process_relocations,
 )
@@ -69,17 +77,10 @@ from ecoscope.platform.tasks.transformation import (
 from ecoscope.platform.tasks.transformation import (
     drop_nan_values_by_column as drop_nan_values_by_column,
 )
-from ecoscope.platform.tasks.transformation import (
-    extract_value_from_json_column as extract_value_from_json_column,
-)
-from ecoscope.platform.tasks.transformation import filter_df as filter_df
 from ecoscope.platform.tasks.transformation import map_columns as map_columns
 from ecoscope.platform.tasks.transformation import sort_values as sort_values
 from ecoscope_workflows_ext_custom.tasks.transformation import (
     decompose_datetime as decompose_datetime,
-)
-from ecoscope_workflows_ext_custom.tasks.transformation import (
-    exclude_row_values as exclude_row_values,
 )
 from wt_contracts import validate as _validate
 from wt_task import task
@@ -159,27 +160,10 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
-    groupers = (
-        task(set_groupers)
+    er_patrol_and_events_params = (
+        task(set_patrols_and_patrol_events_params)
         .validate()
-        .set_task_instance_id("groupers")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                any_is_empty_df,
-                any_dependency_skipped,
-            ],
-            unpack_depth=1,
-        )
-        .partial(**(params.get("groupers") or {}))
-        .call()
-    )
-
-    patrol_obs = (
-        task(get_patrol_observations)
-        .validate()
-        .set_task_instance_id("patrol_obs")
+        .set_task_instance_id("er_patrol_and_events_params")
         .handle_errors()
         .with_tracing()
         .skipif(
@@ -194,16 +178,80 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             time_range=time_range,
             include_patrol_details=True,
             raise_on_empty=False,
-            sub_page_size=None,
+            truncate_to_time_range=True,
+            include_null_geometry=True,
+            sub_page_size=100,
+            **(params.get("er_patrol_and_events_params") or {}),
+        )
+        .call()
+    )
+
+    prefetch_patrols = (
+        task(get_patrols_from_combined_params)
+        .validate()
+        .set_task_instance_id("prefetch_patrols")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            combined_params=er_patrol_and_events_params,
+            **(params.get("prefetch_patrols") or {}),
+        )
+        .call()
+    )
+
+    patrol_obs = (
+        task(get_patrol_observations_from_patrols_df_and_combined_params)
+        .validate()
+        .set_task_instance_id("patrol_obs")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            patrols_df=prefetch_patrols,
+            combined_params=er_patrol_and_events_params,
             **(params.get("patrol_obs") or {}),
         )
         .call()
     )
 
-    events_data = (
-        task(get_events)
+    patrol_events = (
+        task(unpack_events_from_patrols_df_and_combined_params)
         .validate()
-        .set_task_instance_id("events_data")
+        .set_task_instance_id("patrol_events")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            patrols_df=prefetch_patrols,
+            combined_params=er_patrol_and_events_params,
+            **(params.get("patrol_events") or {}),
+        )
+        .call()
+    )
+
+    event_type_display_names = (
+        task(get_event_type_display_names_from_events)
+        .validate()
+        .set_task_instance_id("event_type_display_names")
         .handle_errors()
         .with_tracing()
         .skipif(
@@ -215,21 +263,27 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             client=er_client_name,
-            time_range=time_range,
-            event_columns=[
-                "id",
-                "time",
-                "event_type",
-                "event_category",
-                "reported_by",
-                "serial_number",
-                "geometry",
-            ],
-            raise_on_empty=False,
-            include_null_geometry=True,
-            include_display_values=True,
-            **(params.get("events_data") or {}),
+            events_gdf=patrol_events,
+            append_category_names="duplicates",
+            **(params.get("event_type_display_names") or {}),
         )
+        .call()
+    )
+
+    groupers = (
+        task(set_groupers)
+        .validate()
+        .set_task_instance_id("groupers")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(**(params.get("groupers") or {}))
         .call()
     )
 
@@ -305,6 +359,40 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
+    set_traj_color_column = (
+        task(set_string_var)
+        .validate()
+        .set_task_instance_id("set_traj_color_column")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(**(params.get("set_traj_color_column") or {}))
+        .call()
+    )
+
+    set_event_color_column = (
+        task(set_string_var)
+        .validate()
+        .set_task_instance_id("set_event_color_column")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(**(params.get("set_event_color_column") or {}))
+        .call()
+    )
+
     base_map_defs = (
         task(set_base_maps)
         .validate()
@@ -319,23 +407,6 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(**(params.get("base_map_defs") or {}))
-        .call()
-    )
-
-    exclude_rangers = (
-        task(set_list_of_string_vars)
-        .validate()
-        .set_task_instance_id("exclude_rangers")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                any_is_empty_df,
-                any_dependency_skipped,
-            ],
-            unpack_depth=1,
-        )
-        .partial(**(params.get("exclude_rangers") or {}))
         .call()
     )
 
@@ -447,28 +518,6 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
-    traj_exclude_rangers = (
-        task(exclude_row_values)
-        .validate()
-        .set_task_instance_id("traj_exclude_rangers")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                any_is_empty_df,
-                any_dependency_skipped,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            df=traj_rename_cols,
-            column="patrol_subject",
-            values=exclude_rangers,
-            **(params.get("traj_exclude_rangers") or {}),
-        )
-        .call()
-    )
-
     traj_with_date = (
         task(decompose_datetime)
         .validate()
@@ -483,11 +532,51 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            df=traj_exclude_rangers,
+            df=traj_rename_cols,
             datetime_column="segment_start",
             components=["date"],
             remove_source=False,
             **(params.get("traj_with_date") or {}),
+        )
+        .call()
+    )
+
+    traj_colormap = (
+        task(apply_color_map)
+        .validate()
+        .set_task_instance_id("traj_colormap")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            df=traj_with_date,
+            input_column_name=set_traj_color_column,
+            colormap=[
+                "#FF9600",
+                "#F23B0E",
+                "#A100CB",
+                "#F04564",
+                "#03421A",
+                "#3089FF",
+                "#E26FFF",
+                "#8C1700",
+                "#002960",
+                "#FFD000",
+                "#B62879",
+                "#680078",
+                "#005A56",
+                "#0056C7",
+                "#331878",
+                "#E76826",
+            ],
+            output_column_name="patrol_traj_colormap",
+            **(params.get("traj_colormap") or {}),
         )
         .call()
     )
@@ -506,80 +595,10 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            df=events_data,
+            df=event_type_display_names,
             timezone=get_timezone,
             columns=["time"],
             **(params.get("convert_events_tz") or {}),
-        )
-        .call()
-    )
-
-    extract_reported_by = (
-        task(extract_value_from_json_column)
-        .validate()
-        .set_task_instance_id("extract_reported_by")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                any_is_empty_df,
-                any_dependency_skipped,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            df=convert_events_tz,
-            column_name="reported_by",
-            field_name_options=["name"],
-            output_type="str",
-            output_column_name="reported_by_name",
-            **(params.get("extract_reported_by") or {}),
-        )
-        .call()
-    )
-
-    events_with_reporter = (
-        task(filter_df)
-        .validate()
-        .set_task_instance_id("events_with_reporter")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                any_is_empty_df,
-                any_dependency_skipped,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            df=extract_reported_by,
-            column_name="reported_by_name",
-            op="ne",
-            value="None",
-            reset_index=True,
-            **(params.get("events_with_reporter") or {}),
-        )
-        .call()
-    )
-
-    events_exclude_rangers = (
-        task(exclude_row_values)
-        .validate()
-        .set_task_instance_id("events_exclude_rangers")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                any_is_empty_df,
-                any_dependency_skipped,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            df=events_with_reporter,
-            column="reported_by_name",
-            values=exclude_rangers,
-            **(params.get("events_exclude_rangers") or {}),
         )
         .call()
     )
@@ -598,7 +617,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            df=events_exclude_rangers,
+            df=convert_events_tz,
             roi_gdf=None,
             roi_name=None,
             reset_index=True,
@@ -622,7 +641,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             df=events_filter,
-            input_column_name="event_type",
+            input_column_name=set_event_color_column,
             colormap="tab20b",
             output_column_name="event_type_colormap",
             **(params.get("events_colormap") or {}),
@@ -644,7 +663,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            df=traj_with_date,
+            df=traj_colormap,
             groupers=groupers,
             **(params.get("split_traj_groups") or {}),
         )
@@ -809,11 +828,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .partial(
             drop_columns=[],
             retain_columns=[],
-            rename_columns={
-                "patrol_subject": "Patrol Subject",
-                "segment_start": "Start",
-                "speed_kmhr": "Speed (kph)",
-            },
+            rename_columns={"segment_start": "Start", "speed_kmhr": "Speed (kph)"},
             raise_if_not_found=False,
             **(params.get("traj_display_rename") or {}),
         )
@@ -836,15 +851,17 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             layer_style={
-                "get_color": [80, 80, 80],
-                "color_column": None,
+                "color_column": "patrol_traj_colormap",
                 "get_width": 3,
                 "width_units": "pixels",
                 "cap_rounded": True,
                 "opacity": 1,
             },
-            legend=None,
-            tooltip_columns=["Patrol Subject", "Start", "Speed (kph)"],
+            legend={
+                "label_column": set_traj_color_column,
+                "color_column": "patrol_traj_colormap",
+            },
+            tooltip_columns=["patrol_subject", "Start", "Speed (kph)"],
             **(params.get("traj_polyline_layer") or {}),
         )
         .mapvalues(argnames=["geodataframe"], argvalues=traj_display_rename)
@@ -866,12 +883,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .partial(
             drop_columns=[],
             retain_columns=[],
-            rename_columns={
-                "serial_number": "Event Serial",
-                "time": "Event Time",
-                "event_type_display": "Event Type",
-                "reported_by_name": "Reported By",
-            },
+            rename_columns={"time": "Event Time"},
             raise_if_not_found=False,
             **(params.get("events_display_rename") or {}),
         )
@@ -895,10 +907,10 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .partial(
             layer_style={"fill_color_column": "event_type_colormap", "get_radius": 5},
             legend={
-                "label_column": "Event Type",
+                "label_column": set_event_color_column,
                 "color_column": "event_type_colormap",
             },
-            tooltip_columns=["Event Serial", "Event Time", "Event Type", "Reported By"],
+            tooltip_columns=["Event Time", "event_type"],
             **(params.get("event_point_layer") or {}),
         )
         .mapvalues(argnames=["geodataframe"], argvalues=events_display_rename)
@@ -942,8 +954,8 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             tile_layers=base_map_defs,
             north_arrow_style={"placement": "top-left"},
             legend_style={
-                "title": "Event Type",
-                "format_title": False,
+                "title": "Tracks / Events",
+                "format_title": True,
                 "placement": "bottom-right",
             },
             static=False,

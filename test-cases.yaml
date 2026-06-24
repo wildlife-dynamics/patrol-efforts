@@ -17,12 +17,15 @@ base:
         tzCode: "UTC"
         name: "(UTC+00:00) UTC"
         utc: "+00:00"
+    er_patrol_and_events_params:
+      patrol_types: ["demo_patrol"]
+      event_types: ["wildlife_sighting_rep"]
     groupers:
       groupers: []                      # single view; set a grouper to split
-    patrol_obs:
-      patrol_types: ["demo_patrol"]
-    events_data:
-      event_types: ["wildlife_sighting_rep"]
+    set_traj_color_column:
+      var: "patrol_subject"
+    set_event_color_column:
+      var: "event_type"
     summary_table_df:
       groupby_cols: ["patrol_subject"]
       summary_params:
@@ -40,8 +43,6 @@ base:
       base_maps:
         - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
           opacity: 1.0
-    exclude_rangers:
-      vars: []
 
 # er_asia:
 #   name: ER Asia
@@ -62,12 +63,15 @@ base:
 #         tzCode: "UTC"
 #         name: "(UTC+00:00) UTC"
 #         utc: "+00:00"
+#     er_patrol_and_events_params:
+#       patrol_types: ["demo_patrol"]
+#       event_types: ["wildlife_sighting_rep"]
 #     groupers:
 #       groupers: []
-#     patrol_obs:
-#       patrol_types: ["demo_patrol"]
-#     events_data:
-#       event_types: ["wildlife_sighting_rep"]
+#     set_traj_color_column:
+#       var: "patrol_subject"
+#     set_event_color_column:
+#       var: "event_type"
 #     summary_table_df:
 #       groupby_cols: ["patrol_subject"]
 #       summary_params:
@@ -87,5 +91,3 @@ base:
 #           opacity: 1.0
 #         - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
 #           opacity: 0.5
-#     exclude_rangers:
-#       vars: []

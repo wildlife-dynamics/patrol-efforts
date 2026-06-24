@@ -68,35 +68,7 @@
       "description": "Choose the period of time to analyze.",
       "title": "Time Range"
     },
-    "groupers": {
-      "additionalProperties": false,
-      "properties": {
-        "groupers": {
-          "default": null,
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/ValueGrouper"
-              },
-              {
-                "$ref": "#/$defs/TemporalGrouper"
-              },
-              {
-                "$ref": "#/$defs/SpatialGrouper"
-              }
-            ],
-            "title": "Group by"
-          },
-          "title": " ",
-          "type": "array",
-          "description": "            Specify how the data should be grouped to create the views for your dashboard.\n            This field is optional; if left blank, all the data will appear in a single view.\n            "
-        }
-      },
-      "type": "object",
-      "required": [],
-      "title": "Dashboard Groupers"
-    },
-    "patrol_obs": {
+    "er_patrol_and_events_params": {
       "additionalProperties": false,
       "properties": {
         "patrol_types": {
@@ -106,6 +78,14 @@
           "title": "Patrol Types",
           "type": "array",
           "description": "Specify the patrol type(s) to analyze (optional). Leave empty to analyze all patrol types."
+        },
+        "event_types": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Event Types",
+          "type": "array",
+          "description": "Specify the event type(s) to analyze (optional). Leave this section empty to analyze all event types."
         },
         "status": {
           "default": [
@@ -135,56 +115,67 @@
         }
       },
       "required": [
-        "patrol_types"
-      ],
-      "type": "object",
-      "title": "Get Patrol Observations"
-    },
-    "events_data": {
-      "additionalProperties": false,
-      "properties": {
-        "event_types": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Event Types",
-          "type": "array",
-          "description": "Specify the event type(s) to analyze (optional). Leave this section empty to analyze all event types."
-        },
-        "include_details": {
-          "default": false,
-          "title": "Include Details",
-          "type": "boolean",
-          "description": "Whether or not to include event details",
-          "ecoscope:advanced": true
-        },
-        "include_updates": {
-          "default": false,
-          "title": "Include Updates",
-          "type": "boolean",
-          "description": "Whether or not to include event updates",
-          "ecoscope:advanced": true
-        },
-        "include_related_events": {
-          "default": false,
-          "title": "Include Related Events",
-          "type": "boolean",
-          "description": "Whether or not to include related events",
-          "ecoscope:advanced": true
-        },
-        "force_point_geometry": {
-          "default": true,
-          "title": "Force Point Geometry",
-          "type": "boolean",
-          "description": "If True, polygon/multipolygon event geometries are reduced to their centroid. Set False to preserve native geometry types.",
-          "ecoscope:advanced": true
-        }
-      },
-      "required": [
+        "patrol_types",
         "event_types"
       ],
       "type": "object",
-      "title": "Get Events"
+      "title": "Patrol and Event Params"
+    },
+    "groupers": {
+      "additionalProperties": false,
+      "properties": {
+        "groupers": {
+          "default": null,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ValueGrouper"
+              },
+              {
+                "$ref": "#/$defs/TemporalGrouper"
+              },
+              {
+                "$ref": "#/$defs/SpatialGrouper"
+              }
+            ],
+            "title": "Group by"
+          },
+          "title": " ",
+          "type": "array",
+          "description": "            Specify how the data should be grouped to create the views for your dashboard.\n            This field is optional; if left blank, all the data will appear in a single view.\n            "
+        }
+      },
+      "type": "object",
+      "required": [],
+      "title": "Dashboard Groupers"
+    },
+    "set_traj_color_column": {
+      "additionalProperties": false,
+      "properties": {
+        "var": {
+          "title": "",
+          "type": "string"
+        }
+      },
+      "required": [
+        "var"
+      ],
+      "type": "object",
+      "title": "Track Colour Category"
+    },
+    "set_event_color_column": {
+      "additionalProperties": false,
+      "properties": {
+        "var": {
+          "title": "",
+          "type": "string"
+        }
+      },
+      "required": [
+        "var"
+      ],
+      "type": "object",
+      "title": "Event Colour Category"
     },
     "base_map_defs": {
       "additionalProperties": false,
@@ -378,23 +369,6 @@
       "type": "object",
       "required": [],
       "title": "Map Base Layers"
-    },
-    "exclude_rangers": {
-      "additionalProperties": false,
-      "properties": {
-        "vars": {
-          "items": {
-            "type": "string"
-          },
-          "title": "",
-          "type": "array"
-        }
-      },
-      "required": [
-        "vars"
-      ],
-      "type": "object",
-      "title": "Exclude Rangers"
     },
     "patrol_traj": {
       "additionalProperties": false,
@@ -928,20 +902,12 @@
         "timezone"
       ]
     },
-    "patrol_obs": {
+    "er_patrol_and_events_params": {
       "ui:order": [
         "patrol_types",
+        "event_types",
         "status",
         "patrols_overlap_daterange"
-      ]
-    },
-    "events_data": {
-      "ui:order": [
-        "event_types",
-        "include_details",
-        "include_updates",
-        "include_related_events",
-        "force_point_geometry"
       ]
     },
     "events_filter": {
@@ -972,11 +938,11 @@
       "workflow_details",
       "er_client_name",
       "time_range",
+      "er_patrol_and_events_params",
       "groupers",
-      "patrol_obs",
-      "events_data",
+      "set_traj_color_column",
+      "set_event_color_column",
       "base_map_defs",
-      "exclude_rangers",
       "patrol_traj",
       "traj_with_date",
       "events_filter",

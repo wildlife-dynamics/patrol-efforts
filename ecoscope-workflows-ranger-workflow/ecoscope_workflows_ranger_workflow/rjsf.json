@@ -68,6 +68,84 @@
       "description": "Choose the period of time to analyze.",
       "title": "Time Range"
     },
+    "Patrol and Event Types": {
+      "type": "object",
+      "description": "Fetch patrols and the events reported during them in one combined query.",
+      "ecoscope:task_group": true,
+      "properties": {
+        "er_patrol_and_events_params": {
+          "additionalProperties": false,
+          "properties": {
+            "patrol_types": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Patrol Types",
+              "type": "array",
+              "description": "Specify the patrol type(s) to analyze (optional). Leave empty to analyze all patrol types.",
+              "ecoscope:transform": [
+                {
+                  "transformer": "EarthRangerEnumResolver",
+                  "transformer_kws": {
+                    "type": "patrol_type",
+                    "depends_on": "properties.er_client_name.properties.data_source.properties.name"
+                  }
+                }
+              ]
+            },
+            "event_types": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Event Types",
+              "type": "array",
+              "description": "Specify the event type(s) to map (optional). Leave empty to include all event types reported during the selected patrols.",
+              "ecoscope:transform": [
+                {
+                  "transformer": "EarthRangerEnumResolver",
+                  "transformer_kws": {
+                    "type": "event_type",
+                    "depends_on": "properties.er_client_name.properties.data_source.properties.name"
+                  }
+                }
+              ]
+            },
+            "status": {
+              "default": [
+                "done"
+              ],
+              "items": {
+                "enum": [
+                  "active",
+                  "overdue",
+                  "done",
+                  "cancelled"
+                ],
+                "type": "string"
+              },
+              "title": "Patrol Status",
+              "type": "array",
+              "description": "Choose to analyze patrols with a certain status. If left empty, patrols of all status will be analyzed",
+              "uniqueItems": true,
+              "ecoscope:advanced": true
+            },
+            "patrols_overlap_daterange": {
+              "default": true,
+              "title": "Patrols Overlap Daterange",
+              "type": "boolean",
+              "description": "Whether or not to include patrols that start or end outside of the time range",
+              "ecoscope:advanced": true
+            }
+          },
+          "required": [
+            "patrol_types",
+            "event_types"
+          ],
+          "type": "object",
+          "title": "Patrol and Event Params"
+        }
+      }
+    },
     "groupers": {
       "additionalProperties": false,
       "properties": {
@@ -105,113 +183,61 @@
       "required": [],
       "title": "Dashboard Groupers"
     },
-    "patrol_obs": {
+    "set_traj_color_column": {
       "additionalProperties": false,
       "properties": {
-        "patrol_types": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Patrol Types",
-          "type": "array",
-          "description": "Specify the patrol type(s) to analyze (optional). Leave empty to analyze all patrol types.",
-          "ecoscope:transform": [
+        "var": {
+          "title": "Colour Tracks By",
+          "type": "string",
+          "default": "patrol_subject",
+          "oneOf": [
             {
-              "transformer": "EarthRangerEnumResolver",
-              "transformer_kws": {
-                "type": "patrol_type",
-                "depends_on": "properties.er_client_name.properties.data_source.properties.name"
-              }
+              "const": "patrol_subject",
+              "title": "Patrol Subject"
+            },
+            {
+              "const": "patrol_type__value",
+              "title": "Patrol Type"
+            },
+            {
+              "const": "patrol_status",
+              "title": "Patrol Status"
             }
           ]
-        },
-        "status": {
-          "default": [
-            "done"
-          ],
-          "items": {
-            "enum": [
-              "active",
-              "overdue",
-              "done",
-              "cancelled"
-            ],
-            "type": "string"
-          },
-          "title": "Patrol Status",
-          "type": "array",
-          "description": "Choose to analyze patrols with a certain status. If left empty, patrols of all status will be analyzed",
-          "uniqueItems": true,
-          "ecoscope:advanced": true
-        },
-        "patrols_overlap_daterange": {
-          "default": true,
-          "title": "Patrols Overlap Daterange",
-          "type": "boolean",
-          "description": "Whether or not to include patrols that start or end outside of the time range",
-          "ecoscope:advanced": true
         }
       },
       "required": [
-        "patrol_types"
+        "var"
       ],
       "type": "object",
-      "title": "Get Patrol Observations"
+      "title": "Track Colour Category",
+      "description": "Colour the patrol tracks by the selected category."
     },
-    "events_data": {
+    "set_event_color_column": {
       "additionalProperties": false,
       "properties": {
-        "event_types": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Event Types",
-          "type": "array",
-          "description": "Specify the event type(s) to analyze (optional). Leave this section empty to analyze all event types.",
-          "ecoscope:transform": [
+        "var": {
+          "title": "Colour Events By",
+          "type": "string",
+          "default": "event_type",
+          "oneOf": [
             {
-              "transformer": "EarthRangerEnumResolver",
-              "transformer_kws": {
-                "type": "event_type",
-                "depends_on": "properties.er_client_name.properties.data_source.properties.name"
-              }
+              "const": "event_type",
+              "title": "Event Type"
+            },
+            {
+              "const": "event_category",
+              "title": "Event Category"
             }
           ]
-        },
-        "include_details": {
-          "default": false,
-          "title": "Include Details",
-          "type": "boolean",
-          "description": "Whether or not to include event details",
-          "ecoscope:advanced": true
-        },
-        "include_updates": {
-          "default": false,
-          "title": "Include Updates",
-          "type": "boolean",
-          "description": "Whether or not to include event updates",
-          "ecoscope:advanced": true
-        },
-        "include_related_events": {
-          "default": false,
-          "title": "Include Related Events",
-          "type": "boolean",
-          "description": "Whether or not to include related events",
-          "ecoscope:advanced": true
-        },
-        "force_point_geometry": {
-          "default": true,
-          "title": "Force Point Geometry",
-          "type": "boolean",
-          "description": "If True, polygon/multipolygon event geometries are reduced to their centroid. Set False to preserve native geometry types.",
-          "ecoscope:advanced": true
         }
       },
       "required": [
-        "event_types"
+        "var"
       ],
       "type": "object",
-      "title": "Get Events"
+      "title": "Event Colour Category",
+      "description": "Colour the event points by the selected category."
     },
     "base_map_defs": {
       "additionalProperties": false,
@@ -402,26 +428,6 @@
       "required": [],
       "title": "Map Base Layers"
     },
-    "exclude_rangers": {
-      "additionalProperties": false,
-      "properties": {
-        "vars": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Names to Exclude",
-          "type": "array",
-          "description": "Optional. Ranger names to exclude from the summary table and the map. Names must match the EarthRanger subject name (patrols) or user display name (events) exactly; unmatched entries are ignored.",
-          "default": [],
-          "ecoscope:advanced": true
-        }
-      },
-      "required": [
-        "vars"
-      ],
-      "type": "object",
-      "title": "Exclude Rangers"
-    },
     "Process Patrols": {
       "type": "object",
       "description": "Convert patrol observations to trajectory segments and tag patrol date.",
@@ -476,43 +482,50 @@
         }
       }
     },
-    "events_filter": {
-      "additionalProperties": false,
-      "properties": {
-        "bounding_box": {
-          "allOf": [
-            {
-              "$ref": "#/$defs/BoundingBox"
-            }
-          ],
-          "default": {
-            "min_y": -90.0,
-            "max_y": 90.0,
-            "min_x": -180.0,
-            "max_x": 180.0
-          },
-          "title": "Bounding Box",
-          "description": "Filter events to inside these bounding coordinates.",
-          "ecoscope:advanced": true
-        },
-        "filter_point_coords": {
-          "default": [],
-          "items": {
-            "$ref": "#/$defs/Coordinate"
-          },
-          "title": "Filter Exact Point Coordinates",
-          "type": "array",
-          "description": "By adding a filter, the workflow will not include events recorded at the specified coordinates.",
-          "ecoscope:advanced": true
-        }
-      },
-      "required": [],
+    "Process Events": {
       "type": "object",
-      "title": "Filter Event Locations"
+      "description": "Convert patrol-event times and colour them by the chosen category.",
+      "ecoscope:task_group": true,
+      "properties": {
+        "events_filter": {
+          "additionalProperties": false,
+          "properties": {
+            "bounding_box": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/BoundingBox"
+                }
+              ],
+              "default": {
+                "min_y": -90.0,
+                "max_y": 90.0,
+                "min_x": -180.0,
+                "max_x": 180.0
+              },
+              "title": "Bounding Box",
+              "description": "Filter events to inside these bounding coordinates.",
+              "ecoscope:advanced": true
+            },
+            "filter_point_coords": {
+              "default": [],
+              "items": {
+                "$ref": "#/$defs/Coordinate"
+              },
+              "title": "Filter Exact Point Coordinates",
+              "type": "array",
+              "description": "By adding a filter, the workflow will not include events recorded at the specified coordinates.",
+              "ecoscope:advanced": true
+            }
+          },
+          "required": [],
+          "type": "object",
+          "title": "Filter Event Locations"
+        }
+      }
     },
     "Patrol Effort Summary": {
       "type": "object",
-      "description": "Per-category patrol metrics. Choose the category column and which metrics to show.",
+      "description": "Per-category patrol metrics. Choose the aggregator column and which metrics to show.",
       "ecoscope:task_group": true,
       "properties": {
         "summary_table_df": {
@@ -578,9 +591,9 @@
                   "patrol_status"
                 ]
               },
-              "title": "Category Column",
+              "title": "Aggregator",
               "type": "array",
-              "description": "Column to group summary rows by. Default: patrol subject (ranger). Other options: patrol_type__value, patrol_status."
+              "description": "Column to aggregate (group) summary rows by. Default: patrol subject (ranger). Other options: patrol_type__value, patrol_status."
             }
           },
           "required": [
@@ -1033,21 +1046,15 @@
         "timezone"
       ]
     },
-    "patrol_obs": {
-      "ui:order": [
-        "patrol_types",
-        "status",
-        "patrols_overlap_daterange"
-      ]
-    },
-    "events_data": {
-      "ui:order": [
-        "event_types",
-        "include_details",
-        "include_updates",
-        "include_related_events",
-        "force_point_geometry"
-      ]
+    "Patrol and Event Types": {
+      "er_patrol_and_events_params": {
+        "ui:order": [
+          "patrol_types",
+          "event_types",
+          "status",
+          "patrols_overlap_daterange"
+        ]
+      }
     },
     "Process Patrols": {
       "ui:order": [
@@ -1055,11 +1062,13 @@
         "traj_with_date"
       ]
     },
-    "events_filter": {
-      "ui:order": [
-        "bounding_box",
-        "filter_point_coords"
-      ]
+    "Process Events": {
+      "events_filter": {
+        "ui:order": [
+          "bounding_box",
+          "filter_point_coords"
+        ]
+      }
     },
     "Patrol Effort Summary": {
       "summary_table_df": {
@@ -1093,13 +1102,13 @@
       "workflow_details",
       "er_client_name",
       "time_range",
+      "Patrol and Event Types",
       "groupers",
-      "patrol_obs",
-      "events_data",
+      "set_traj_color_column",
+      "set_event_color_column",
       "base_map_defs",
-      "exclude_rangers",
       "Process Patrols",
-      "events_filter",
+      "Process Events",
       "Patrol Effort Summary",
       "Patrol Coverage Map",
       "Event Density Map"
