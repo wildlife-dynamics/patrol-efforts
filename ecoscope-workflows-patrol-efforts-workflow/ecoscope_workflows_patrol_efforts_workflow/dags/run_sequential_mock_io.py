@@ -52,7 +52,6 @@ get_event_type_display_names_from_events = create_func_magicmock(  # 🧪
 from ecoscope.platform.tasks.analysis import (
     calculate_feature_density as calculate_feature_density,
 )
-from ecoscope.platform.tasks.analysis import create_meshgrid as create_meshgrid
 from ecoscope.platform.tasks.analysis import (
     get_coverage_legend_title as get_coverage_legend_title,
 )
@@ -66,6 +65,15 @@ from ecoscope.platform.tasks.analysis import (
     set_patrol_summary_metrics as set_patrol_summary_metrics,
 )
 from ecoscope.platform.tasks.analysis import summarize_df as summarize_df
+from ecoscope.platform.tasks.config import (
+    call_meshgrid_from_combined_params as call_meshgrid_from_combined_params,
+)
+from ecoscope.platform.tasks.config import (
+    get_opacity_from_combined_params as get_opacity_from_combined_params,
+)
+from ecoscope.platform.tasks.config import (
+    set_density_grid_options as set_density_grid_options,
+)
 from ecoscope.platform.tasks.config import (
     set_list_of_string_vars as set_list_of_string_vars,
 )
@@ -451,6 +459,60 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(**(params.get("base_map_defs") or {}))
+        .call()
+    )
+
+    coverage_weighting = (
+        task(set_coverage_weighting)
+        .validate()
+        .set_task_instance_id("coverage_weighting")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(**(params.get("coverage_weighting") or {}))
+        .call()
+    )
+
+    density_grid_options = (
+        task(set_density_grid_options)
+        .validate()
+        .set_task_instance_id("density_grid_options")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(intersecting_only=False, **(params.get("density_grid_options") or {}))
+        .call()
+    )
+
+    heatmap_opacity = (
+        task(get_opacity_from_combined_params)
+        .validate()
+        .set_task_instance_id("heatmap_opacity")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            combined_params=density_grid_options,
+            **(params.get("heatmap_opacity") or {}),
+        )
         .call()
     )
 
@@ -1164,7 +1226,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
     )
 
     coverage_meshgrid = (
-        task(create_meshgrid)
+        task(call_meshgrid_from_combined_params)
         .validate()
         .set_task_instance_id("coverage_meshgrid")
         .handle_errors()
@@ -1179,26 +1241,9 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             aoi=traj_with_date,
-            intersecting_only=False,
+            combined_params=density_grid_options,
             **(params.get("coverage_meshgrid") or {}),
         )
-        .call()
-    )
-
-    coverage_weighting = (
-        task(set_coverage_weighting)
-        .validate()
-        .set_task_instance_id("coverage_weighting")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                any_is_empty_df,
-                any_dependency_skipped,
-            ],
-            unpack_depth=1,
-        )
-        .partial(**(params.get("coverage_weighting") or {}))
         .call()
     )
 
@@ -1387,7 +1432,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             layer_style={
                 "fill_color_column": "density_colormap",
                 "get_line_width": 0,
-                "opacity": 0.4,
+                "opacity": heatmap_opacity,
             },
             legend={"label_column": "density_bins", "color_column": "density_colormap"},
             tooltip_columns=["Patrol Effort"],
@@ -1483,7 +1528,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
     )
 
     event_meshgrid = (
-        task(create_meshgrid)
+        task(call_meshgrid_from_combined_params)
         .validate()
         .set_task_instance_id("event_meshgrid")
         .handle_errors()
@@ -1498,7 +1543,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             aoi=events_colormap,
-            intersecting_only=False,
+            combined_params=density_grid_options,
             **(params.get("event_meshgrid") or {}),
         )
         .call()
@@ -1651,7 +1696,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             layer_style={
                 "fill_color_column": "density_colormap",
                 "get_line_width": 0,
-                "opacity": 0.4,
+                "opacity": heatmap_opacity,
             },
             legend={"label_column": "density_bins", "color_column": "density_colormap"},
             tooltip_columns=["Event Count"],

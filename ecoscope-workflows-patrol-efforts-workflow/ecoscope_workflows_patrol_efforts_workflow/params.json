@@ -370,6 +370,63 @@
       "required": [],
       "title": "Map Base Layers"
     },
+    "coverage_weighting": {
+      "additionalProperties": false,
+      "properties": {
+        "sum_column": {
+          "default": "timespan_seconds",
+          "enum": [
+            "timespan_seconds",
+            "dist_meters"
+          ],
+          "title": "Sum Column",
+          "type": "string",
+          "description": "Weight each grid cell by total patrol time or distance travelled."
+        }
+      },
+      "type": "object",
+      "required": [],
+      "title": "Coverage Weighting"
+    },
+    "density_grid_options": {
+      "additionalProperties": false,
+      "properties": {
+        "opacity": {
+          "default": 0.4,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Heatmap Layer Opacity",
+          "type": "number",
+          "description": "Set heatmap layer transparency from 1 (fully visible) to 0 (hidden).",
+          "ecoscope:advanced": true
+        },
+        "auto_scale_or_custom_cell_size": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AutoScaleGridCellSize"
+            },
+            {
+              "$ref": "#/$defs/CustomGridCellSize"
+            }
+          ],
+          "default": {
+            "auto_scale_or_custom": "Auto-scale"
+          },
+          "title": "Grid Cell Size",
+          "ecoscope:advanced": true
+        },
+        "crs": {
+          "default": "EPSG:3857",
+          "title": "Coordinate Reference System",
+          "type": "string",
+          "description": "The coordinate reference system in which to perform the calculation, must be a valid CRS authority code, for example ESRI:53042",
+          "ecoscope:advanced": true
+        }
+      },
+      "type": "object",
+      "required": [],
+      "title": "Density Grid Options"
+    },
     "patrol_filters": {
       "additionalProperties": false,
       "properties": {
@@ -525,84 +582,6 @@
       "type": "object",
       "required": [],
       "title": "Summary Metrics"
-    },
-    "coverage_meshgrid": {
-      "additionalProperties": false,
-      "properties": {
-        "auto_scale_or_custom_cell_size": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/AutoScaleGridCellSize"
-            },
-            {
-              "$ref": "#/$defs/CustomGridCellSize"
-            }
-          ],
-          "default": {
-            "auto_scale_or_custom": "Auto-scale"
-          },
-          "title": "Grid Cell Size",
-          "ecoscope:advanced": true
-        },
-        "crs": {
-          "default": "EPSG:3857",
-          "title": "Coordinate Reference System",
-          "type": "string",
-          "description": "The coordinate reference system in which to perform the calculation, must be a valid CRS authority code, for example ESRI:53042",
-          "ecoscope:advanced": true
-        }
-      },
-      "required": [],
-      "type": "object",
-      "title": "Coverage Meshgrid"
-    },
-    "coverage_weighting": {
-      "additionalProperties": false,
-      "properties": {
-        "sum_column": {
-          "default": "timespan_seconds",
-          "enum": [
-            "timespan_seconds",
-            "dist_meters"
-          ],
-          "title": "Sum Column",
-          "type": "string",
-          "description": "Weight each grid cell by total patrol time or distance travelled."
-        }
-      },
-      "type": "object",
-      "required": [],
-      "title": "Coverage Weighting"
-    },
-    "event_meshgrid": {
-      "additionalProperties": false,
-      "properties": {
-        "auto_scale_or_custom_cell_size": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/AutoScaleGridCellSize"
-            },
-            {
-              "$ref": "#/$defs/CustomGridCellSize"
-            }
-          ],
-          "default": {
-            "auto_scale_or_custom": "Auto-scale"
-          },
-          "title": "Grid Cell Size",
-          "ecoscope:advanced": true
-        },
-        "crs": {
-          "default": "EPSG:3857",
-          "title": "Coordinate Reference System",
-          "type": "string",
-          "description": "The coordinate reference system in which to perform the calculation, must be a valid CRS authority code, for example ESRI:53042",
-          "ecoscope:advanced": true
-        }
-      },
-      "required": [],
-      "type": "object",
-      "title": "Event Meshgrid"
     }
   },
   "$defs": {
@@ -718,6 +697,48 @@
         "index_name"
       ],
       "title": "Category",
+      "type": "object"
+    },
+    "AutoScaleGridCellSize": {
+      "properties": {
+        "auto_scale_or_custom": {
+          "const": "Auto-scale",
+          "default": "Auto-scale",
+          "ecoscope:advanced": true,
+          "enum": [
+            "Auto-scale"
+          ],
+          "title": "Grid Cell Size",
+          "type": "string"
+        }
+      },
+      "title": "Auto-scale",
+      "type": "object"
+    },
+    "CustomGridCellSize": {
+      "properties": {
+        "auto_scale_or_custom": {
+          "const": "Customize",
+          "default": "Customize",
+          "ecoscope:advanced": true,
+          "enum": [
+            "Customize"
+          ],
+          "title": "Grid Cell Size",
+          "type": "string"
+        },
+        "grid_cell_size": {
+          "default": 5000,
+          "description": "Define the resolution of the raster grid (in the unit of measurement defined by the coordinate reference system set below). A smaller grid cell size provides more detail, while a larger size generalizes the data.",
+          "exclusiveMaximum": 10000,
+          "exclusiveMinimum": 0,
+          "gt": 0,
+          "lt": 10000,
+          "title": "Custom Grid Cell Size",
+          "type": "number"
+        }
+      },
+      "title": "Customize",
       "type": "object"
     },
     "BoundingBox": {
@@ -1109,48 +1130,6 @@
       },
       "title": "Area Covered (Unmerged)",
       "type": "object"
-    },
-    "AutoScaleGridCellSize": {
-      "properties": {
-        "auto_scale_or_custom": {
-          "const": "Auto-scale",
-          "default": "Auto-scale",
-          "ecoscope:advanced": true,
-          "enum": [
-            "Auto-scale"
-          ],
-          "title": "Grid Cell Size",
-          "type": "string"
-        }
-      },
-      "title": "Auto-scale",
-      "type": "object"
-    },
-    "CustomGridCellSize": {
-      "properties": {
-        "auto_scale_or_custom": {
-          "const": "Customize",
-          "default": "Customize",
-          "ecoscope:advanced": true,
-          "enum": [
-            "Customize"
-          ],
-          "title": "Grid Cell Size",
-          "type": "string"
-        },
-        "grid_cell_size": {
-          "default": 5000,
-          "description": "Define the resolution of the raster grid (in the unit of measurement defined by the coordinate reference system set below). A smaller grid cell size provides more detail, while a larger size generalizes the data.",
-          "exclusiveMaximum": 10000,
-          "exclusiveMinimum": 0,
-          "gt": 0,
-          "lt": 10000,
-          "title": "Custom Grid Cell Size",
-          "type": "number"
-        }
-      },
-      "title": "Customize",
-      "type": "object"
     }
   },
   "uiSchema": {
@@ -1175,23 +1154,18 @@
         "patrols_overlap_daterange"
       ]
     },
+    "density_grid_options": {
+      "ui:order": [
+        "opacity",
+        "auto_scale_or_custom_cell_size",
+        "crs"
+      ]
+    },
     "patrol_filters": {
       "ui:order": [
         "bounding_box",
         "filter_point_coords",
         "trajectory_segment_filter"
-      ]
-    },
-    "coverage_meshgrid": {
-      "ui:order": [
-        "auto_scale_or_custom_cell_size",
-        "crs"
-      ]
-    },
-    "event_meshgrid": {
-      "ui:order": [
-        "auto_scale_or_custom_cell_size",
-        "crs"
       ]
     },
     "ui:order": [
@@ -1203,12 +1177,11 @@
       "set_traj_color_column",
       "set_event_color_column",
       "base_map_defs",
+      "coverage_weighting",
+      "density_grid_options",
       "patrol_filters",
       "summary_groupby",
-      "summary_metrics",
-      "coverage_meshgrid",
-      "coverage_weighting",
-      "event_meshgrid"
+      "summary_metrics"
     ]
   },
   "additionalProperties": false

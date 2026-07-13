@@ -115,14 +115,15 @@ rjsf-overrides:
       - {const: "event_type", title: "Event Type"}
       - {const: "event_category", title: "Event Category"}
 
-    # --- Coverage map weighting (time vs distance) ---
-    "Patrol Coverage Map.properties.coverage_weighting.title": ""
-    "Patrol Coverage Map.properties.coverage_weighting.properties.sum_column.title": "Coverage Weighting"
-    "Patrol Coverage Map.properties.coverage_weighting.properties.sum_column.description": "Weight each grid cell by total patrol time (hours) or distance travelled (km)."
-    "Patrol Coverage Map.properties.coverage_weighting.properties.sum_column.default": "timespan_seconds"
-    "Patrol Coverage Map.properties.coverage_weighting.properties.sum_column.oneOf":
-      - {const: "timespan_seconds", title: "Time (hours)"}
-      - {const: "dist_meters", title: "Distance (km)"}
+    # --- Patrol & Event Density Map: effort weighting (time vs distance) ---
+    "Patrol & Event Density Map.properties.coverage_weighting.title": ""
+    "Patrol & Event Density Map.properties.coverage_weighting.properties.sum_column.title": "Calculate Patrol Effort per Cell"
+    "Patrol & Event Density Map.properties.coverage_weighting.properties.sum_column.description": "Weight each grid cell by total patrol time (hours) or distance travelled (km)."
+    "Patrol & Event Density Map.properties.coverage_weighting.properties.sum_column.default": "timespan_seconds"
+    "Patrol & Event Density Map.properties.coverage_weighting.properties.sum_column.oneOf":
+      - {const: "timespan_seconds", title: "Time"}
+      - {const: "dist_meters", title: "Distance"}
+    "Patrol & Event Density Map.properties.density_grid_options.title": ""
 
     # --- Filter Data: combined filter card (applies to tracks + events) ---
     "Filter Data.properties.patrol_filters.title": ""
@@ -156,10 +157,9 @@ rjsf-overrides:
       - groupers
       - Filter Data
       - Patrol Effort Summary
-      - Patrols & Events Map
       - base_map_defs
-      - Patrol Coverage Map
-      - Event Density Map
+      - Patrols & Events Map
+      - Patrol & Event Density Map
 
 task-instance-defaults:
   skipif:
@@ -282,6 +282,31 @@ workflow:
   - name: Map Base Layers
     id: base_map_defs
     task: set_base_maps
+
+  # ---------- Patrol & Event Density Map settings (shared by both heatmaps) ----------
+  - title: Patrol & Event Density Map
+    type: task-group
+    description: "Grid heatmaps of patrol effort and event counts."
+    tasks:
+      - name: Coverage Weighting
+        id: coverage_weighting
+        task: set_coverage_weighting
+        # sum_column is NOT in partial -> user-facing (Calculate Patrol Effort per Cell).
+
+      - name: Density Grid Options
+        id: density_grid_options
+        task: set_density_grid_options
+        # opacity / cell size / crs are all ecoscope:advanced -> the card's single
+        # Advanced Configurations accordion.
+        partial:
+          intersecting_only: false
+
+  # Invisible extractor: opacity for both heatmap polygon layers.
+  - name: Heatmap Layer Opacity
+    id: heatmap_opacity
+    task: get_opacity_from_combined_params
+    partial:
+      combined_params: ${{ workflow.density_grid_options.return }}
 
   # ---------- Filter Data (shared: patrol tracks + events) ----------
   - title: Filter Data
@@ -670,7 +695,7 @@ workflow:
     tasks:
       - name: Coverage Meshgrid
         id: coverage_meshgrid
-        task: create_meshgrid
+        task: call_meshgrid_from_combined_params
         skipif:
           conditions:
             - any_is_empty_df
@@ -678,12 +703,7 @@ workflow:
             - all_geometry_are_none
         partial:
           aoi: ${{ workflow.traj_with_date.return }}
-          intersecting_only: false
-
-      - name: Coverage Weighting
-        id: coverage_weighting
-        task: set_coverage_weighting
-        # sum_column is NOT in partial -> user-facing (Coverage Weighting dropdown).
+          combined_params: ${{ workflow.density_grid_options.return }}
 
       - name: Calculate Patrol Effort per Cell
         id: grouped_coverage_density
@@ -783,7 +803,7 @@ workflow:
           layer_style:
             fill_color_column: density_colormap
             get_line_width: 0
-            opacity: 0.4
+            opacity: ${{ workflow.heatmap_opacity.return }}
           legend:
             label_column: density_bins
             color_column: density_colormap
@@ -847,7 +867,7 @@ workflow:
     tasks:
       - name: Event Meshgrid
         id: event_meshgrid
-        task: create_meshgrid
+        task: call_meshgrid_from_combined_params
         skipif:
           conditions:
             - any_is_empty_df
@@ -855,7 +875,7 @@ workflow:
             - all_geometry_are_none
         partial:
           aoi: ${{ workflow.events_colormap.return }}
-          intersecting_only: false
+          combined_params: ${{ workflow.density_grid_options.return }}
 
       - name: Calculate Event Counts per Cell
         id: grouped_event_density
@@ -940,7 +960,7 @@ workflow:
           layer_style:
             fill_color_column: density_colormap
             get_line_width: 0
-            opacity: 0.4
+            opacity: ${{ workflow.heatmap_opacity.return }}
           legend:
             label_column: density_bins
             color_column: density_colormap
