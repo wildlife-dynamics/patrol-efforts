@@ -88,6 +88,53 @@ coverage-distance:
         - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
           opacity: 1.0
 
+grouped:
+  name: Grouped
+  description: >-
+    Mocked IO — exercises the Group Data card: a value grouper (patrol serial
+    number, hits the traj rename + int->string casts on both branches) plus a
+    monthly temporal grouper (hits both add_temporal_index tasks).
+  mock_io: true
+  params:
+    workflow_details:
+      name: "Patrol Efforts"
+      description: "Per-category patrol effort summary, coverage and event density."
+    er_client_name:
+      data_source:
+        name: "er_asia"
+    time_range:
+      since: "2015-01-10T00:00:00"
+      until: "2015-02-28T23:59:59"
+      timezone:
+        label: "UTC (UTC+00:00)"
+        tzCode: "UTC"
+        name: "(UTC+00:00) UTC"
+        utc: "+00:00"
+    er_patrol_and_events_params:
+      patrol_types: ["demo_patrol"]
+      event_types: ["wildlife_sighting_rep"]
+    groupers:
+      groupers:
+        - index_name: "patrol_serial_number"
+        - temporal_index: "%B"
+    set_traj_color_column:
+      var: "patrol_subject"
+    set_event_color_column:
+      var: "event_type"
+    summary_groupby:
+      vars: ["patrol_subject"]
+    summary_metrics:
+      metrics:
+        - {metric: patrol_count}
+        - {metric: total_distance, unit: km}
+        - {metric: total_duration, unit: h}
+    coverage_weighting:
+      sum_column: timespan_seconds
+    base_map_defs:
+      base_maps:
+        - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
+          opacity: 1.0
+
 # er_asia:
 #   name: ER Asia
 #   description: Live EarthRanger (er-asia), 1-6 May 2026, demo_patrol + wildlife sightings.

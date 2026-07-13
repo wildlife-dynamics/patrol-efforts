@@ -70,7 +70,7 @@
     },
     "Patrol and Event Types": {
       "type": "object",
-      "description": "Fetch patrols and the events reported during them in one combined query.",
+      "description": " ",
       "ecoscope:task_group": true,
       "properties": {
         "er_patrol_and_events_params": {
@@ -82,7 +82,7 @@
               },
               "title": "Patrol Types",
               "type": "array",
-              "description": "Specify the patrol type(s) to analyze (optional). Leave empty to analyze all patrol types.",
+              "description": "Specify the patrol type(s) to analyze (optional). Leave this section empty to analyze all patrol types.",
               "ecoscope:transform": [
                 {
                   "transformer": "EarthRangerEnumResolver",
@@ -99,7 +99,7 @@
               },
               "title": "Event Types",
               "type": "array",
-              "description": "Specify the event type(s) to map (optional). Leave empty to include all event types reported during the selected patrols.",
+              "description": "Specify the event type(s) to analyze (optional). Leave this section empty to analyze all event types.",
               "ecoscope:transform": [
                 {
                   "transformer": "EarthRangerEnumResolver",
@@ -142,46 +142,41 @@
             "event_types"
           ],
           "type": "object",
-          "title": "Patrol and Event Params"
+          "title": ""
         }
       }
     },
-    "groupers": {
-      "additionalProperties": false,
+    "Group Data": {
+      "type": "object",
+      "description": "Configure how patrols and events are grouped (by category or temporal index) and split into per-group dashboard views.",
+      "ecoscope:task_group": true,
       "properties": {
         "groupers": {
-          "default": null,
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/ValueGrouper"
+          "additionalProperties": false,
+          "properties": {
+            "groupers": {
+              "default": null,
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ValueGrouper"
+                  },
+                  {
+                    "$ref": "#/$defs/TemporalGrouper"
+                  }
+                ],
+                "title": "Group by"
               },
-              {
-                "$ref": "#/$defs/TemporalGrouper"
-              },
-              {
-                "$ref": "#/$defs/SpatialGrouper"
-              }
-            ],
-            "title": "Group by"
-          },
-          "title": " ",
-          "type": "array",
-          "description": "            Specify how the data should be grouped to create the views for your dashboard.\n            This field is optional; if left blank, all the data will appear in a single view.\n            ",
-          "ecoscope:transform": [
-            {
-              "transformer": "EarthRangerEnumResolver",
-              "transformer_kws": {
-                "type": "spatial_feature_group",
-                "depends_on": "properties.er_client_name.properties.data_source.properties.name"
-              }
+              "title": " ",
+              "type": "array",
+              "description": ""
             }
-          ]
+          },
+          "type": "object",
+          "required": [],
+          "title": ""
         }
-      },
-      "type": "object",
-      "required": [],
-      "title": "Dashboard Groupers"
+      }
     },
     "Patrols & Events Map": {
       "type": "object",
@@ -445,7 +440,7 @@
               "default": "timespan_seconds",
               "title": "Calculate Patrol Effort per Cell",
               "type": "string",
-              "description": "Weight each grid cell by total patrol time (hours) or distance travelled (km).",
+              "description": "Weight each grid cell by total patrol time (hours) or distance traveled (km).",
               "oneOf": [
                 {
                   "const": "timespan_seconds",
@@ -505,7 +500,7 @@
     },
     "Filter Data": {
       "type": "object",
-      "description": "Spatial and trajectory filters applied to BOTH the patrol tracks and the events.",
+      "description": " ",
       "ecoscope:task_group": true,
       "properties": {
         "patrol_filters": {
@@ -524,7 +519,7 @@
                 "max_x": 180.0
               },
               "title": "Bounding Box",
-              "description": "Only include patrol tracks and events whose coordinates fall inside this bounding box.",
+              "description": "Only include patrol observations and events whose coordinates fall inside this bounding box. Applies to BOTH the patrol trajectories and the patrol events.",
               "ecoscope:advanced": true
             },
             "filter_point_coords": {
@@ -547,7 +542,7 @@
               },
               "title": "Filter Exact Point Coordinates",
               "type": "array",
-              "description": "Exclude tracks and events recorded at these exact coordinates (e.g. known bad GPS fixes).",
+              "description": "Exclude observations and events recorded at these exact coordinates (e.g. known bad GPS fixes). Applies to BOTH the patrol trajectories and the patrol events.",
               "ecoscope:advanced": true
             },
             "trajectory_segment_filter": {
@@ -565,7 +560,7 @@
                 "max_speed_kmhr": 500
               },
               "title": "Trajectory Filter",
-              "description": "Drop trajectory segments outside these length / time / speed bounds (applies to the patrol tracks only).",
+              "description": "Drop trajectory segments outside these length / time / speed bounds (e.g. to remove implausible jumps). Applies to the patrol trajectories only.",
               "ecoscope:advanced": true
             }
           },
@@ -603,7 +598,7 @@
               },
               "title": "Aggregator",
               "type": "array",
-              "description": "Column to aggregate (group) summary rows by. Default: patrol subject (ranger). Other options: patrol_type__value, patrol_status.",
+              "description": "Category to group summary rows by. Default: Patrol Subject (ranger).",
               "default": [
                 "patrol_subject"
               ]
@@ -795,17 +790,28 @@
       "type": "object"
     },
     "ValueGrouper": {
+      "title": "Category",
+      "type": "object",
       "properties": {
         "index_name": {
-          "title": "Category",
-          "type": "string"
+          "title": "Index Name",
+          "type": "string",
+          "oneOf": [
+            {
+              "const": "patrol_serial_number",
+              "title": "Patrol Serial Number"
+            },
+            {
+              "const": "patrol_type__value",
+              "title": "Patrol Type"
+            },
+            {
+              "const": "patrol_subject",
+              "title": "Patrol Subject"
+            }
+          ]
         }
-      },
-      "required": [
-        "index_name"
-      ],
-      "title": "Category",
-      "type": "object"
+      }
     },
     "AutoScaleGridCellSize": {
       "properties": {
@@ -1261,7 +1267,17 @@
           "event_types",
           "status",
           "patrols_overlap_daterange"
-        ]
+        ],
+        "patrol_types": {
+          "items": {
+            "ui:help": "If you are on Ecoscope Desktop, \"Patrol Type\" values can be found in your EarthRanger Admin site under Activity \u2192 Patrol Types."
+          }
+        },
+        "event_types": {
+          "items": {
+            "ui:help": "If you are on Ecoscope Desktop, \"Event Type\" values can be found in your EarthRanger Admin site under Activity \u2192 Event Types."
+          }
+        }
       }
     },
     "Patrols & Events Map": {
@@ -1398,13 +1414,22 @@
       "er_client_name",
       "time_range",
       "Patrol and Event Types",
-      "groupers",
       "Filter Data",
+      "Group Data",
       "Patrol Effort Summary",
       "base_map_defs",
       "Patrols & Events Map",
       "Patrol & Event Density Map"
-    ]
+    ],
+    "base_map_defs": {
+      "base_maps": {
+        "items": {
+          "ui:options": {
+            "label": false
+          }
+        }
+      }
+    }
   },
   "additionalProperties": false
 }

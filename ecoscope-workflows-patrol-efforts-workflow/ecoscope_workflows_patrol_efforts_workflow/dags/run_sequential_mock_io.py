@@ -107,11 +107,17 @@ from ecoscope.platform.tasks.skip import (
 )
 from ecoscope.platform.tasks.skip import never as never
 from ecoscope.platform.tasks.transformation import (
+    add_temporal_index as add_temporal_index,
+)
+from ecoscope.platform.tasks.transformation import (
     apply_classification as apply_classification,
 )
 from ecoscope.platform.tasks.transformation import apply_color_map as apply_color_map
 from ecoscope.platform.tasks.transformation import (
     apply_reloc_coord_filter as apply_reloc_coord_filter,
+)
+from ecoscope.platform.tasks.transformation import (
+    convert_column_values_to_string as convert_column_values_to_string,
 )
 from ecoscope.platform.tasks.transformation import (
     convert_values_to_timezone as convert_values_to_timezone,
@@ -191,7 +197,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             ],
             unpack_depth=1,
         )
-        .partial(time_format="%d %b %Y %H:%M:%S", **(params.get("time_range") or {}))
+        .partial(time_format="%d %b %Y %H:%M:%S %Z", **(params.get("time_range") or {}))
         .call()
     )
 
@@ -672,6 +678,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             rename_columns={
                 "extra__patrol_subject": "patrol_subject",
                 "extra__patrol_id": "patrol_id",
+                "extra__patrol_serial_number": "patrol_serial_number",
                 "extra__patrol_type__value": "patrol_type__value",
                 "extra__patrol_status": "patrol_status",
             },
@@ -705,6 +712,30 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
+    traj_add_temporal_index = (
+        task(add_temporal_index)
+        .validate()
+        .set_task_instance_id("traj_add_temporal_index")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            df=traj_with_date,
+            time_col="segment_start",
+            groupers=groupers,
+            cast_to_datetime=True,
+            format="mixed",
+            **(params.get("traj_add_temporal_index") or {}),
+        )
+        .call()
+    )
+
     traj_colormap = (
         task(apply_color_map)
         .validate()
@@ -719,7 +750,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            df=traj_with_date,
+            df=traj_add_temporal_index,
             input_column_name=set_traj_color_column,
             colormap=[
                 "#FF9600",
@@ -792,6 +823,54 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
+    pe_rename_grouper_cols = (
+        task(map_columns)
+        .validate()
+        .set_task_instance_id("pe_rename_grouper_cols")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            df=events_filter,
+            drop_columns=[],
+            retain_columns=[],
+            rename_columns={"patrol_type": "patrol_type__value"},
+            raise_if_not_found=False,
+            **(params.get("pe_rename_grouper_cols") or {}),
+        )
+        .call()
+    )
+
+    pe_add_temporal_index = (
+        task(add_temporal_index)
+        .validate()
+        .set_task_instance_id("pe_add_temporal_index")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            df=pe_rename_grouper_cols,
+            time_col="patrol_start_time",
+            groupers=groupers,
+            cast_to_datetime=True,
+            format="mixed",
+            **(params.get("pe_add_temporal_index") or {}),
+        )
+        .call()
+    )
+
     events_colormap = (
         task(apply_color_map)
         .validate()
@@ -806,11 +885,53 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            df=events_filter,
+            df=pe_add_temporal_index,
             input_column_name=set_event_color_column,
             colormap="tab20b",
             output_column_name="event_type_colormap",
             **(params.get("events_colormap") or {}),
+        )
+        .call()
+    )
+
+    traj_cols_to_string = (
+        task(convert_column_values_to_string)
+        .validate()
+        .set_task_instance_id("traj_cols_to_string")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            df=traj_colormap,
+            columns=["patrol_serial_number", "patrol_type__value"],
+            **(params.get("traj_cols_to_string") or {}),
+        )
+        .call()
+    )
+
+    pe_cols_to_string = (
+        task(convert_column_values_to_string)
+        .validate()
+        .set_task_instance_id("pe_cols_to_string")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            df=events_colormap,
+            columns=["patrol_serial_number", "patrol_type__value"],
+            **(params.get("pe_cols_to_string") or {}),
         )
         .call()
     )
@@ -829,7 +950,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            df=traj_colormap,
+            df=traj_cols_to_string,
             groupers=groupers,
             **(params.get("split_traj_groups") or {}),
         )
@@ -850,7 +971,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            df=events_colormap,
+            df=pe_cols_to_string,
             groupers=groupers,
             **(params.get("split_event_groups") or {}),
         )

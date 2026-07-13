@@ -147,7 +147,7 @@
       },
       "type": "object",
       "required": [],
-      "title": "Dashboard Groupers"
+      "title": "Group Data"
     },
     "set_traj_color_column": {
       "additionalProperties": false,
