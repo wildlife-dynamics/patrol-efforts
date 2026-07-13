@@ -183,7 +183,7 @@
       "required": [],
       "title": "Dashboard Groupers"
     },
-    "Map Configuration": {
+    "Patrols & Events Map": {
       "type": "object",
       "description": "Colour the Patrols & Events map layers.",
       "ecoscope:task_group": true,
@@ -1162,7 +1162,7 @@
         ]
       }
     },
-    "Map Configuration": {
+    "Patrols & Events Map": {
       "ui:order": [
         "set_traj_color_column",
         "set_event_color_column"
@@ -1220,7 +1220,7 @@
       "groupers",
       "Filter Data",
       "Patrol Effort Summary",
-      "Map Configuration",
+      "Patrols & Events Map",
       "base_map_defs",
       "Patrol Coverage Map",
       "Event Density Map"

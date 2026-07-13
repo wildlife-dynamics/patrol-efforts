@@ -134,16 +134,16 @@ rjsf-overrides:
         swath_width_meters: 500.0
         decimal_places: 1
 
-    # --- Map Configuration: per-layer category colour selectors (classifier) ---
-    "Map Configuration.properties.set_traj_color_column.properties.var.title": "Colour Tracks By"
-    "Map Configuration.properties.set_traj_color_column.properties.var.default": "patrol_subject"
-    "Map Configuration.properties.set_traj_color_column.properties.var.oneOf":
+    # --- Patrols & Events Map: per-layer category colour selectors (classifier) ---
+    "Patrols & Events Map.properties.set_traj_color_column.properties.var.title": "Colour Tracks By"
+    "Patrols & Events Map.properties.set_traj_color_column.properties.var.default": "patrol_subject"
+    "Patrols & Events Map.properties.set_traj_color_column.properties.var.oneOf":
       - {const: "patrol_subject", title: "Patrol Subject"}
       - {const: "patrol_type__value", title: "Patrol Type"}
       - {const: "patrol_status", title: "Patrol Status"}
-    "Map Configuration.properties.set_event_color_column.properties.var.title": "Colour Events By"
-    "Map Configuration.properties.set_event_color_column.properties.var.default": "event_type"
-    "Map Configuration.properties.set_event_color_column.properties.var.oneOf":
+    "Patrols & Events Map.properties.set_event_color_column.properties.var.title": "Colour Events By"
+    "Patrols & Events Map.properties.set_event_color_column.properties.var.default": "event_type"
+    "Patrols & Events Map.properties.set_event_color_column.properties.var.oneOf":
       - {const: "event_type", title: "Event Type"}
       - {const: "event_category", title: "Event Category"}
 
@@ -161,7 +161,7 @@ rjsf-overrides:
 
   uiSchema:
     Filter Data.patrol_filters.filter_point_coords.items.ui:options.label: false
-    # Render the Map Configuration card AFTER Patrol Effort Summary, even though
+    # Render the Patrols & Events Map card AFTER Patrol Effort Summary, even though
     # its colour-selector tasks must be declared earlier (before split_groups).
     ui:order:
       - workflow_details
@@ -171,7 +171,7 @@ rjsf-overrides:
       - groupers
       - Filter Data
       - Patrol Effort Summary
-      - Map Configuration
+      - Patrols & Events Map
       - base_map_defs
       - Patrol Coverage Map
       - Event Density Map
@@ -281,7 +281,7 @@ workflow:
   # Per-layer colour-category selectors for the Patrols & Events map. Declared
   # here (they must precede split_groups in the DAG); the form renders this
   # card AFTER Patrol Effort Summary via the uiSchema ui:order below.
-  - title: Map Configuration
+  - title: Patrols & Events Map
     type: task-group
     description: "Colour the Patrols & Events map layers."
     tasks:
