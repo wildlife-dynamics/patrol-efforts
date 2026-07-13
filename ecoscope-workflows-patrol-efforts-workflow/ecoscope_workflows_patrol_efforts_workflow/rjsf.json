@@ -938,8 +938,8 @@
         },
         "merged": {
           "default": true,
-          "description": "Merge overlapping swaths before measuring (union); otherwise sum per-segment areas.",
-          "title": "Merged",
+          "description": "On: report the actual footprint, so ground a patrol revisits is counted once. Off: add up each segment's area separately, counting revisited ground multiple times.",
+          "title": "Count Overlapping Ground Once",
           "type": "boolean"
         },
         "swath_width_meters": {
@@ -1303,10 +1303,56 @@
       "summary_metrics": {
         "metrics": {
           "items": {
-            "ui:title": " ",
-            "metric": {
-              "ui:widget": "hidden"
-            }
+            "oneOf": [
+              {
+                "ui:options": {
+                  "label": false
+                },
+                "metric": {
+                  "ui:widget": "hidden"
+                }
+              },
+              {
+                "ui:options": {
+                  "label": false
+                },
+                "metric": {
+                  "ui:widget": "hidden"
+                }
+              },
+              {
+                "ui:options": {
+                  "label": false
+                },
+                "metric": {
+                  "ui:widget": "hidden"
+                }
+              },
+              {
+                "ui:options": {
+                  "label": false
+                },
+                "metric": {
+                  "ui:widget": "hidden"
+                }
+              },
+              {
+                "ui:options": {
+                  "label": false
+                },
+                "metric": {
+                  "ui:widget": "hidden"
+                }
+              },
+              {
+                "ui:options": {
+                  "label": false
+                },
+                "metric": {
+                  "ui:widget": "hidden"
+                }
+              }
+            ]
           }
         }
       }

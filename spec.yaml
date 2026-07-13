@@ -129,11 +129,19 @@ rjsf-overrides:
 
   uiSchema:
     Filter Data.patrol_filters.filter_point_coords.items.ui:options.label: false
-    # Preset metric rows: the union selector already names the branch, so blank
-    # the selected branch's object title and hide the redundant discriminator
-    # dropdown (its value is auto-filled from the branch default).
-    "Patrol Effort Summary.summary_metrics.metrics.items.ui:title": " "
-    "Patrol Effort Summary.summary_metrics.metrics.items.metric.ui:widget": hidden
+    # Preset metric rows: per-branch uiSchema (one entry per union member, in
+    # order). ui:options.label false hides the branch heading (the selector
+    # already names it); the hidden metric widget hides the discriminator
+    # dropdown (auto-filled from the branch default). NOTE: when a branch is
+    # selected these entries REPLACE the base items uiSchema, so the item-level
+    # label ("Summary Metrics-N") renders from the base one untouched.
+    "Patrol Effort Summary.summary_metrics.metrics.items.oneOf":
+      - {"ui:options": {"label": false}, "metric": {"ui:widget": "hidden"}}
+      - {"ui:options": {"label": false}, "metric": {"ui:widget": "hidden"}}
+      - {"ui:options": {"label": false}, "metric": {"ui:widget": "hidden"}}
+      - {"ui:options": {"label": false}, "metric": {"ui:widget": "hidden"}}
+      - {"ui:options": {"label": false}, "metric": {"ui:widget": "hidden"}}
+      - {"ui:options": {"label": false}, "metric": {"ui:widget": "hidden"}}
     # Render the Patrols & Events Map card AFTER Patrol Effort Summary, even though
     # its colour-selector tasks must be declared earlier (before split_groups).
     ui:order:
