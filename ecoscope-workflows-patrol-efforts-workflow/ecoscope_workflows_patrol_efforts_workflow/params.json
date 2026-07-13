@@ -370,7 +370,7 @@
       "required": [],
       "title": "Map Base Layers"
     },
-    "coverage_weighting": {
+    "density_weighting": {
       "additionalProperties": false,
       "properties": {
         "sum_column": {
@@ -968,12 +968,12 @@
         },
         "aggregator": {
           "enum": [
-            "count",
-            "nunique",
             "sum",
+            "count",
             "min",
             "max",
             "mean",
+            "nunique",
             "median"
           ],
           "title": "Statistic",
@@ -1183,7 +1183,7 @@
       "set_traj_color_column",
       "set_event_color_column",
       "base_map_defs",
-      "coverage_weighting",
+      "density_weighting",
       "density_grid_options",
       "patrol_filters",
       "summary_groupby",

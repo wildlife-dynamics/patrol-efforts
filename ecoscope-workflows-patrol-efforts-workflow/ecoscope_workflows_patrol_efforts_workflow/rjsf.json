@@ -433,7 +433,7 @@
       "description": "Grid heatmaps of patrol effort and event counts.",
       "ecoscope:task_group": true,
       "properties": {
-        "coverage_weighting": {
+        "density_weighting": {
           "additionalProperties": false,
           "properties": {
             "sum_column": {
@@ -1076,12 +1076,12 @@
         },
         "aggregator": {
           "enum": [
-            "count",
-            "nunique",
             "sum",
+            "count",
             "min",
             "max",
             "mean",
+            "nunique",
             "median"
           ],
           "title": "Statistic",
@@ -1288,7 +1288,7 @@
     },
     "Patrol & Event Density Map": {
       "ui:order": [
-        "coverage_weighting",
+        "density_weighting",
         "density_grid_options"
       ],
       "density_grid_options": {

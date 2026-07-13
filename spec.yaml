@@ -123,10 +123,10 @@ rjsf-overrides:
       - {const: "event_category", title: "Event Category"}
 
     # --- Patrol & Event Density Map: effort weighting (time vs distance) ---
-    "Patrol & Event Density Map.properties.coverage_weighting.title": ""
-    "Patrol & Event Density Map.properties.coverage_weighting.properties.sum_column.title": "Calculate Patrol Effort per Cell"
-    "Patrol & Event Density Map.properties.coverage_weighting.properties.sum_column.description": "Weight each grid cell by total patrol time (hours) or distance traveled (km)."
-    "Patrol & Event Density Map.properties.coverage_weighting.properties.sum_column.default": "timespan_seconds"
+    "Patrol & Event Density Map.properties.density_weighting.title": ""
+    "Patrol & Event Density Map.properties.density_weighting.properties.sum_column.title": "Calculate Patrol Effort per Cell"
+    "Patrol & Event Density Map.properties.density_weighting.properties.sum_column.description": "Weight each grid cell by total patrol time (hours) or distance traveled (km)."
+    "Patrol & Event Density Map.properties.density_weighting.properties.sum_column.default": "timespan_seconds"
     # Time/Distance option labels come from the task schema (_labeled_weighting).
     "Patrol & Event Density Map.properties.density_grid_options.title": ""
 
@@ -348,8 +348,8 @@ workflow:
     description: "Grid heatmaps of patrol effort and event counts."
     tasks:
       - name: Coverage Weighting
-        id: coverage_weighting
-        task: set_coverage_weighting
+        id: density_weighting
+        task: set_density_weighting
         # sum_column is NOT in partial -> user-facing (Calculate Patrol Effort per Cell).
 
       - name: Density Grid Options
@@ -830,25 +830,27 @@ workflow:
         partial:
           meshgrid: ${{ workflow.coverage_meshgrid.return }}
           geometry_type: line
-          sum_column: ${{ workflow.coverage_weighting.return }}
+          sum_column: ${{ workflow.density_weighting.return }}
         mapvalues:
           argnames: geodataframe
           argvalues: ${{ workflow.split_traj_groups.return }}
 
       - name: Normalize Coverage Units
         id: coverage_normalized
-        task: normalize_coverage_density
+        task: normalize_density_units
         partial:
-          sum_column: ${{ workflow.coverage_weighting.return }}
+          sum_column: ${{ workflow.density_weighting.return }}
         mapvalues:
           argnames: df
           argvalues: ${{ workflow.grouped_coverage_density.return }}
 
       - name: Coverage Legend Title
         id: coverage_legend_title
-        task: get_coverage_legend_title
+        task: get_density_legend_title
         partial:
-          sum_column: ${{ workflow.coverage_weighting.return }}
+          sum_column: ${{ workflow.density_weighting.return }}
+          # bound so the prefix stays off the form
+          title_prefix: Patrol Effort
 
       - name: Sort Coverage Values
         id: coverage_sorted

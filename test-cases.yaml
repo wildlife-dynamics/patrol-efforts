@@ -27,7 +27,8 @@ base:
     set_event_color_column:
       var: "event_type"
     summary_groupby:
-      vars: ["patrol_subject"]
+      # two aggregators: exercises multi-column grouping + header renames
+      vars: ["patrol_subject", "patrol_type__value"]
     summary_metrics:
       metrics:
         - {metric: patrol_count}
@@ -39,7 +40,7 @@ base:
         # exercises the custom escape hatch incl. checkbox-gated unit conversion
         - {metric: custom, display_name: "Avg Leg Distance (km)", aggregator: mean,
            column: dist_meters, convert_units: true, original_unit: m, new_unit: km}
-    coverage_weighting:
+    density_weighting:
       sum_column: timespan_seconds
     base_map_defs:
       base_maps:
@@ -81,7 +82,7 @@ coverage-distance:
         - {metric: patrol_count}
         - {metric: total_distance, unit: km}
         - {metric: total_duration, unit: h}
-    coverage_weighting:
+    density_weighting:
       sum_column: dist_meters
     base_map_defs:
       base_maps:
@@ -128,16 +129,18 @@ grouped:
         - {metric: patrol_count}
         - {metric: total_distance, unit: km}
         - {metric: total_duration, unit: h}
-    coverage_weighting:
+    density_weighting:
       sum_column: timespan_seconds
     base_map_defs:
       base_maps:
         - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
           opacity: 1.0
 
-er_asia:
-  name: ER Asia
-  description: Live EarthRanger (er-asia), 1-6 May 2026, demo_patrol + wildlife sightings.
+mep_dev:
+  name: MEP Dev
+  description: >-
+    Live EarthRanger (mep-dev), 10 Jan - 28 Feb 2015 seeded ecoscope_patrol data
+    (same window/type as wt-download-patrols' live cases).
   mock_io: false
   params:
     workflow_details:
@@ -145,18 +148,19 @@ er_asia:
       description: "Per-category patrol effort summary, coverage and event density."
     er_client_name:
       data_source:
-        name: "er_asia"
+        name: "mep_dev"
     time_range:
-      since: "2026-05-01T00:00:00"
-      until: "2026-05-06T23:59:59"
+      since: "2015-01-10T00:00:00"
+      until: "2015-02-28T23:59:59"
       timezone:
-        label: "UTC (UTC+00:00)"
-        tzCode: "UTC"
-        name: "(UTC+00:00) UTC"
-        utc: "+00:00"
+        label: "Africa/Nairobi (UTC+03:00)"
+        tzCode: "Africa/Nairobi"
+        name: "(UTC+03:00) Nairobi"
+        utc: "+03:00"
     er_patrol_and_events_params:
-      patrol_types: ["demo_patrol"]
-      event_types: ["wildlife_sighting_rep"]
+      patrol_types: ["ecoscope_patrol"]
+      status: ["done"]
+      event_types: []
     groupers:
       groupers: []
     set_traj_color_column:
@@ -173,7 +177,7 @@ er_asia:
         - {metric: patrol_days}
         - {metric: area_covered_merged, swath_width_meters: 500.0}
         - {metric: area_covered_unmerged, swath_width_meters: 500.0}
-    coverage_weighting:
+    density_weighting:
       sum_column: timespan_seconds
     base_map_defs:
       base_maps:
