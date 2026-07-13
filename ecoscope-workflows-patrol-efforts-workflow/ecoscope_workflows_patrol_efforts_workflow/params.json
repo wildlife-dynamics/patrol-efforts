@@ -556,19 +556,23 @@
       "type": "object",
       "title": "Coverage Meshgrid"
     },
-    "grouped_coverage_density": {
+    "coverage_weighting": {
       "additionalProperties": false,
       "properties": {
         "sum_column": {
-          "default": null,
+          "default": "timespan_seconds",
+          "enum": [
+            "timespan_seconds",
+            "dist_meters"
+          ],
           "title": "Sum Column",
           "type": "string",
-          "description": "Sum values in this column per grid cell, rather than counting rows"
+          "description": "Weight each grid cell by total patrol time or distance travelled."
         }
       },
-      "required": [],
       "type": "object",
-      "title": "Calculate Patrol Effort per Cell"
+      "required": [],
+      "title": "Coverage Weighting"
     },
     "event_meshgrid": {
       "additionalProperties": false,
@@ -1203,7 +1207,7 @@
       "summary_groupby",
       "summary_metrics",
       "coverage_meshgrid",
-      "grouped_coverage_density",
+      "coverage_weighting",
       "event_meshgrid"
     ]
   },

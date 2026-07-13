@@ -116,10 +116,13 @@ rjsf-overrides:
       - {const: "event_category", title: "Event Category"}
 
     # --- Coverage map weighting (time vs distance) ---
-    "Patrol Coverage Map.properties.grouped_coverage_density.properties.sum_column.title": "Coverage Weighting"
-    "Patrol Coverage Map.properties.grouped_coverage_density.properties.sum_column.description": "Weight each grid cell by total patrol time (timespan_seconds) or distance travelled (dist_meters)."
-    "Patrol Coverage Map.properties.grouped_coverage_density.properties.sum_column.default": "timespan_seconds"
-    "Patrol Coverage Map.properties.grouped_coverage_density.properties.sum_column.enum": ["timespan_seconds", "dist_meters"]
+    "Patrol Coverage Map.properties.coverage_weighting.title": ""
+    "Patrol Coverage Map.properties.coverage_weighting.properties.sum_column.title": "Coverage Weighting"
+    "Patrol Coverage Map.properties.coverage_weighting.properties.sum_column.description": "Weight each grid cell by total patrol time (hours) or distance travelled (km)."
+    "Patrol Coverage Map.properties.coverage_weighting.properties.sum_column.default": "timespan_seconds"
+    "Patrol Coverage Map.properties.coverage_weighting.properties.sum_column.oneOf":
+      - {const: "timespan_seconds", title: "Time (hours)"}
+      - {const: "dist_meters", title: "Distance (km)"}
 
     # --- Filter Data: combined filter card (applies to tracks + events) ---
     "Filter Data.properties.patrol_filters.title": ""
@@ -677,16 +680,36 @@ workflow:
           aoi: ${{ workflow.traj_with_date.return }}
           intersecting_only: false
 
+      - name: Coverage Weighting
+        id: coverage_weighting
+        task: set_coverage_weighting
+        # sum_column is NOT in partial -> user-facing (Coverage Weighting dropdown).
+
       - name: Calculate Patrol Effort per Cell
         id: grouped_coverage_density
         task: calculate_feature_density
-        # sum_column is NOT in partial -> user-facing (Coverage Weighting dropdown).
         partial:
           meshgrid: ${{ workflow.coverage_meshgrid.return }}
           geometry_type: line
+          sum_column: ${{ workflow.coverage_weighting.return }}
         mapvalues:
           argnames: geodataframe
           argvalues: ${{ workflow.split_traj_groups.return }}
+
+      - name: Normalize Coverage Units
+        id: coverage_normalized
+        task: normalize_coverage_density
+        partial:
+          sum_column: ${{ workflow.coverage_weighting.return }}
+        mapvalues:
+          argnames: df
+          argvalues: ${{ workflow.grouped_coverage_density.return }}
+
+      - name: Coverage Legend Title
+        id: coverage_legend_title
+        task: get_coverage_legend_title
+        partial:
+          sum_column: ${{ workflow.coverage_weighting.return }}
 
       - name: Sort Coverage Values
         id: coverage_sorted
@@ -697,7 +720,7 @@ workflow:
           na_position: last
         mapvalues:
           argnames: df
-          argvalues: ${{ workflow.grouped_coverage_density.return }}
+          argvalues: ${{ workflow.coverage_normalized.return }}
 
       - name: Drop NaN Coverage Cells
         id: coverage_drop_nan
@@ -719,7 +742,7 @@ workflow:
             k: 10
           label_options:
             label_ranges: true
-            label_decimals: 0
+            label_decimals: 1
         mapvalues:
           argnames: df
           argvalues: ${{ workflow.coverage_drop_nan.return }}
@@ -779,7 +802,7 @@ workflow:
           north_arrow_style:
             placement: top-left
           legend_style:
-            title: "Patrol Effort"
+            title: ${{ workflow.coverage_legend_title.return }}
             format_title: false
             placement: bottom-right
           static: false

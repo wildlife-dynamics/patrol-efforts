@@ -39,7 +39,7 @@ base:
         # exercises the custom escape hatch incl. checkbox-gated unit conversion
         - {metric: custom, display_name: "Avg Leg Distance (km)", aggregator: mean,
            column: dist_meters, convert_units: true, original_unit: m, new_unit: km}
-    grouped_coverage_density:
+    coverage_weighting:
       sum_column: timespan_seconds
     base_map_defs:
       base_maps:
@@ -81,7 +81,7 @@ coverage-distance:
         - {metric: patrol_count}
         - {metric: total_distance, unit: km}
         - {metric: total_duration, unit: h}
-    grouped_coverage_density:
+    coverage_weighting:
       sum_column: dist_meters
     base_map_defs:
       base_maps:
@@ -126,7 +126,7 @@ coverage-distance:
 #         - {metric: patrol_days}
 #         - {metric: area_covered_merged, swath_width_meters: 500.0}
 #         - {metric: area_covered_unmerged, swath_width_meters: 500.0}
-#     grouped_coverage_density:
+#     coverage_weighting:
 #       sum_column: timespan_seconds
 #     base_map_defs:
 #       base_maps:

@@ -7,6 +7,15 @@ from ecoscope.platform.tasks.analysis import (
 )
 from ecoscope.platform.tasks.analysis import create_meshgrid as create_meshgrid
 from ecoscope.platform.tasks.analysis import (
+    get_coverage_legend_title as get_coverage_legend_title,
+)
+from ecoscope.platform.tasks.analysis import (
+    normalize_coverage_density as normalize_coverage_density,
+)
+from ecoscope.platform.tasks.analysis import (
+    set_coverage_weighting as set_coverage_weighting,
+)
+from ecoscope.platform.tasks.analysis import (
     set_patrol_summary_metrics as set_patrol_summary_metrics,
 )
 from ecoscope.platform.tasks.analysis import summarize_df as summarize_df
@@ -1156,6 +1165,23 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
+    coverage_weighting = (
+        task(set_coverage_weighting)
+        .validate()
+        .set_task_instance_id("coverage_weighting")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(**(params.get("coverage_weighting") or {}))
+        .call()
+    )
+
     grouped_coverage_density = (
         task(calculate_feature_density)
         .validate()
@@ -1172,9 +1198,48 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .partial(
             meshgrid=coverage_meshgrid,
             geometry_type="line",
+            sum_column=coverage_weighting,
             **(params.get("grouped_coverage_density") or {}),
         )
         .mapvalues(argnames=["geodataframe"], argvalues=split_traj_groups)
+    )
+
+    coverage_normalized = (
+        task(normalize_coverage_density)
+        .validate()
+        .set_task_instance_id("coverage_normalized")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            sum_column=coverage_weighting, **(params.get("coverage_normalized") or {})
+        )
+        .mapvalues(argnames=["df"], argvalues=grouped_coverage_density)
+    )
+
+    coverage_legend_title = (
+        task(get_coverage_legend_title)
+        .validate()
+        .set_task_instance_id("coverage_legend_title")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            sum_column=coverage_weighting, **(params.get("coverage_legend_title") or {})
+        )
+        .call()
     )
 
     coverage_sorted = (
@@ -1196,7 +1261,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             na_position="last",
             **(params.get("coverage_sorted") or {}),
         )
-        .mapvalues(argnames=["df"], argvalues=grouped_coverage_density)
+        .mapvalues(argnames=["df"], argvalues=coverage_normalized)
     )
 
     coverage_drop_nan = (
@@ -1233,7 +1298,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             input_column_name="density",
             output_column_name="density_bins",
             classification_options={"scheme": "equal_interval", "k": 10},
-            label_options={"label_ranges": True, "label_decimals": 0},
+            label_options={"label_ranges": True, "label_decimals": 1},
             **(params.get("coverage_classify") or {}),
         )
         .mapvalues(argnames=["df"], argvalues=coverage_drop_nan)
@@ -1329,7 +1394,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             tile_layers=base_map_defs,
             north_arrow_style={"placement": "top-left"},
             legend_style={
-                "title": "Patrol Effort",
+                "title": coverage_legend_title,
                 "format_title": False,
                 "placement": "bottom-right",
             },
