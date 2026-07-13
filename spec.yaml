@@ -142,6 +142,7 @@ rjsf-overrides:
       - {"ui:options": {"label": false}, "metric": {"ui:widget": "hidden"}}
       - {"ui:options": {"label": false}, "metric": {"ui:widget": "hidden"}}
       - {"ui:options": {"label": false}, "metric": {"ui:widget": "hidden"}}
+      - {"ui:options": {"label": false}, "metric": {"ui:widget": "hidden"}}
     # Render the Patrols & Events Map card AFTER Patrol Effort Summary, even though
     # its colour-selector tasks must be declared earlier (before split_groups).
     ui:order:

@@ -565,20 +565,19 @@
                   "metric": "patrol_days"
                 },
                 {
-                  "metric": "area_covered",
-                  "merged": true,
+                  "metric": "area_covered_merged",
                   "swath_width_meters": 500.0
                 },
                 {
-                  "metric": "area_covered",
-                  "merged": false,
+                  "metric": "area_covered_unmerged",
                   "swath_width_meters": 500.0
                 }
               ],
               "items": {
                 "discriminator": {
                   "mapping": {
-                    "area_covered": "#/$defs/AreaCoveredMetric",
+                    "area_covered_merged": "#/$defs/MergedAreaCoveredMetric",
+                    "area_covered_unmerged": "#/$defs/UnmergedAreaCoveredMetric",
                     "custom": "#/$defs/CustomMetric",
                     "patrol_count": "#/$defs/PatrolCountMetric",
                     "patrol_days": "#/$defs/PatrolDaysMetric",
@@ -601,7 +600,10 @@
                     "$ref": "#/$defs/TotalDurationMetric"
                   },
                   {
-                    "$ref": "#/$defs/AreaCoveredMetric"
+                    "$ref": "#/$defs/MergedAreaCoveredMetric"
+                  },
+                  {
+                    "$ref": "#/$defs/UnmergedAreaCoveredMetric"
                   },
                   {
                     "$ref": "#/$defs/CustomMetric"
@@ -925,34 +927,112 @@
       "title": "TrajectorySegmentFilter",
       "type": "object"
     },
-    "AreaCoveredMetric": {
-      "properties": {
-        "metric": {
-          "const": "area_covered",
-          "default": "area_covered",
-          "enum": [
-            "area_covered"
-          ],
-          "title": "Metric",
-          "type": "string"
-        },
-        "merged": {
-          "default": true,
-          "description": "On: report the actual footprint, so ground a patrol revisits is counted once. Off: add up each segment's area separately, counting revisited ground multiple times.",
-          "title": "Count Overlapping Ground Once",
-          "type": "boolean"
-        },
-        "swath_width_meters": {
-          "default": 500.0,
-          "description": "Full corridor width in meters.",
-          "title": "Swath Width (m)",
-          "type": "number"
+    "CustomMetric": {
+      "dependencies": {
+        "convert_units": {
+          "oneOf": [
+            {
+              "properties": {
+                "convert_units": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "convert_units": {
+                  "const": true
+                },
+                "original_unit": {
+                  "oneOf": [
+                    {
+                      "const": "m",
+                      "title": "Meters (m)"
+                    },
+                    {
+                      "const": "km",
+                      "title": "Kilometers (km)"
+                    },
+                    {
+                      "const": "m\u00b2",
+                      "title": "Square Meters (m\u00b2)"
+                    },
+                    {
+                      "const": "km\u00b2",
+                      "title": "Square Kilometers (km\u00b2)"
+                    },
+                    {
+                      "const": "s",
+                      "title": "Seconds (s)"
+                    },
+                    {
+                      "const": "h",
+                      "title": "Hours (h)"
+                    },
+                    {
+                      "const": "d",
+                      "title": "Days (d)"
+                    },
+                    {
+                      "const": "m/s",
+                      "title": "Meters per Second (m/s)"
+                    },
+                    {
+                      "const": "km/h",
+                      "title": "Kilometers per Hour (km/h)"
+                    }
+                  ],
+                  "title": "Original Unit",
+                  "type": "string"
+                },
+                "new_unit": {
+                  "oneOf": [
+                    {
+                      "const": "m",
+                      "title": "Meters (m)"
+                    },
+                    {
+                      "const": "km",
+                      "title": "Kilometers (km)"
+                    },
+                    {
+                      "const": "m\u00b2",
+                      "title": "Square Meters (m\u00b2)"
+                    },
+                    {
+                      "const": "km\u00b2",
+                      "title": "Square Kilometers (km\u00b2)"
+                    },
+                    {
+                      "const": "s",
+                      "title": "Seconds (s)"
+                    },
+                    {
+                      "const": "h",
+                      "title": "Hours (h)"
+                    },
+                    {
+                      "const": "d",
+                      "title": "Days (d)"
+                    },
+                    {
+                      "const": "m/s",
+                      "title": "Meters per Second (m/s)"
+                    },
+                    {
+                      "const": "km/h",
+                      "title": "Kilometers per Hour (km/h)"
+                    }
+                  ],
+                  "title": "New Unit",
+                  "type": "string"
+                }
+              }
+            }
+          ]
         }
       },
-      "title": "Area Covered",
-      "type": "object"
-    },
-    "CustomMetric": {
+      "description": "Define your own metric: pick a column and statistic, with optional unit conversion.",
       "properties": {
         "metric": {
           "const": "custom",
@@ -963,73 +1043,6 @@
           "title": "Metric",
           "type": "string"
         },
-        "param": {
-          "description": "Full metric definition.",
-          "discriminator": {
-            "mapping": {
-              "count": "#/$defs/TallySummaryParam",
-              "max": "#/$defs/NumericSummaryParam",
-              "mean": "#/$defs/NumericSummaryParam",
-              "median": "#/$defs/NumericSummaryParam",
-              "min": "#/$defs/NumericSummaryParam",
-              "night_day_ratio": "#/$defs/NightDayRatioSummaryParam",
-              "nunique": "#/$defs/TallySummaryParam",
-              "sum": "#/$defs/NumericSummaryParam"
-            },
-            "propertyName": "aggregator"
-          },
-          "oneOf": [
-            {
-              "$ref": "#/$defs/TallySummaryParam"
-            },
-            {
-              "$ref": "#/$defs/NumericSummaryParam"
-            },
-            {
-              "$ref": "#/$defs/NightDayRatioSummaryParam"
-            }
-          ],
-          "title": " "
-        }
-      },
-      "required": [
-        "param"
-      ],
-      "title": "Custom",
-      "type": "object"
-    },
-    "NightDayRatioSummaryParam": {
-      "description": "Ratio of night to day fixes. Has no column or units.",
-      "properties": {
-        "display_name": {
-          "description": "Column header shown in the summary table.",
-          "title": "Display Name",
-          "type": "string"
-        },
-        "aggregator": {
-          "const": "night_day_ratio",
-          "enum": [
-            "night_day_ratio"
-          ],
-          "title": "Statistic",
-          "type": "string"
-        },
-        "decimal_places": {
-          "default": 2,
-          "title": "Decimal Places",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "display_name",
-        "aggregator"
-      ],
-      "title": "Night/Day Ratio Metric",
-      "type": "object"
-    },
-    "NumericSummaryParam": {
-      "description": "Numeric reduction (sum / min / max / mean / median) with optional unit conversion.",
-      "properties": {
         "display_name": {
           "description": "Column header shown in the summary table.",
           "title": "Display Name",
@@ -1037,6 +1050,8 @@
         },
         "aggregator": {
           "enum": [
+            "count",
+            "nunique",
             "sum",
             "min",
             "max",
@@ -1051,28 +1066,15 @@
           "title": "Column",
           "type": "string"
         },
-        "original_unit": {
-          "allOf": [
-            {
-              "$ref": "#/$defs/Unit"
-            }
-          ],
-          "default": null,
-          "title": "Original Unit"
-        },
-        "new_unit": {
-          "allOf": [
-            {
-              "$ref": "#/$defs/Unit"
-            }
-          ],
-          "default": null,
-          "title": "New Unit"
-        },
         "decimal_places": {
           "default": 2,
           "title": "Decimal Places",
           "type": "integer"
+        },
+        "convert_units": {
+          "default": false,
+          "title": "Convert Units",
+          "type": "boolean"
         }
       },
       "required": [
@@ -1080,7 +1082,29 @@
         "aggregator",
         "column"
       ],
-      "title": "Numeric Metric",
+      "title": "Custom",
+      "type": "object"
+    },
+    "MergedAreaCoveredMetric": {
+      "description": "Area covered with overlaps counted once \u2014 the distinct ground footprint.",
+      "properties": {
+        "metric": {
+          "const": "area_covered_merged",
+          "default": "area_covered_merged",
+          "enum": [
+            "area_covered_merged"
+          ],
+          "title": "Metric",
+          "type": "string"
+        },
+        "swath_width_meters": {
+          "default": 500.0,
+          "description": "Full corridor width in meters.",
+          "title": "Swath Width (m)",
+          "type": "number"
+        }
+      },
+      "title": "Area Covered (Merged)",
       "type": "object"
     },
     "PatrolCountMetric": {
@@ -1113,36 +1137,6 @@
       "title": "Patrol Days",
       "type": "object"
     },
-    "TallySummaryParam": {
-      "description": "Count-style metric (count / nunique) over a single column.",
-      "properties": {
-        "display_name": {
-          "description": "Column header shown in the summary table.",
-          "title": "Display Name",
-          "type": "string"
-        },
-        "aggregator": {
-          "enum": [
-            "count",
-            "nunique"
-          ],
-          "title": "Statistic",
-          "type": "string"
-        },
-        "column": {
-          "description": "Column to aggregate.",
-          "title": "Column",
-          "type": "string"
-        }
-      },
-      "required": [
-        "display_name",
-        "aggregator",
-        "column"
-      ],
-      "title": "Count Metric",
-      "type": "object"
-    },
     "TotalDistanceMetric": {
       "properties": {
         "metric": {
@@ -1156,9 +1150,15 @@
         },
         "unit": {
           "default": "km",
-          "enum": [
-            "km",
-            "m"
+          "oneOf": [
+            {
+              "const": "km",
+              "title": "Kilometers (km)"
+            },
+            {
+              "const": "m",
+              "title": "Meters (m)"
+            }
           ],
           "title": "Unit",
           "type": "string"
@@ -1180,9 +1180,15 @@
         },
         "unit": {
           "default": "h",
-          "enum": [
-            "h",
-            "d"
+          "oneOf": [
+            {
+              "const": "h",
+              "title": "Hours (h)"
+            },
+            {
+              "const": "d",
+              "title": "Days (d)"
+            }
           ],
           "title": "Unit",
           "type": "string"
@@ -1191,20 +1197,27 @@
       "title": "Total Duration",
       "type": "object"
     },
-    "Unit": {
-      "enum": [
-        "m",
-        "km",
-        "m\u00b2",
-        "km\u00b2",
-        "s",
-        "h",
-        "d",
-        "m/s",
-        "km/h"
-      ],
-      "title": "Unit",
-      "type": "string"
+    "UnmergedAreaCoveredMetric": {
+      "description": "Area covered summed segment by segment \u2014 total patrol efforts.",
+      "properties": {
+        "metric": {
+          "const": "area_covered_unmerged",
+          "default": "area_covered_unmerged",
+          "enum": [
+            "area_covered_unmerged"
+          ],
+          "title": "Metric",
+          "type": "string"
+        },
+        "swath_width_meters": {
+          "default": 500.0,
+          "description": "Full corridor width in meters.",
+          "title": "Swath Width (m)",
+          "type": "number"
+        }
+      },
+      "title": "Area Covered (Unmerged)",
+      "type": "object"
     },
     "AutoScaleGridCellSize": {
       "properties": {
@@ -1304,6 +1317,14 @@
         "metrics": {
           "items": {
             "oneOf": [
+              {
+                "ui:options": {
+                  "label": false
+                },
+                "metric": {
+                  "ui:widget": "hidden"
+                }
+              },
               {
                 "ui:options": {
                   "label": false

@@ -5,8 +5,8 @@
 
 ```yaml
 # fingerprint:
-artifacts_sha256_basic: 86bb0677a621dc9648027c0bfb2f426985b5a9e10eeaa313a3ca71a653bd5c78
-artifacts_sha256_strict: b9426504157703744d5ebabb9aec787434a9611280d512b27319f8723759cbf3
+artifacts_sha256_basic: ad92e820ccc3b621d3cbd6d8d2d5432b77777a6a8a6c016f371faed28a6b1cf4
+artifacts_sha256_strict: 32609928bd8e25a9f3b4e3fb6c2c3bc072da86f47f43b14ac0bd30b66cbef10d
 installed_requirements:
 - channel: conda-forge
   name: python
@@ -25,7 +25,7 @@ installed_requirements:
   version: {version: ==2.3.3}
 - channel: conda-forge
   name: geopandas
-  version: {version: ==1.1.3}
+  version: {version: ==1.1.4}
 - channel: conda-forge
   name: rasterio
   version: {version: ==1.5.0}
@@ -35,8 +35,8 @@ installed_requirements:
 - channel: conda-forge
   name: setuptools
   version: {version: ==80.10.2}
-params_sha256: 367e83baa35712bfd02c9f19c5594d5373256ce616e204dcec4b519bf9fc8f59
-spec_sha256: 4c162b4c3a7fee1af223d4704e705c11ef24e581d2ca74e33d44ede892063d7a
+params_sha256: 028f7fee3d2ffa237947e6a821478bc79687866bcfe64cee475f04eab7ee94a3
+spec_sha256: f96783cbf2c0055bdea51706ad28adbe03dd2b88be695ceabfbf1e6327ab3557
 
 ```
 
