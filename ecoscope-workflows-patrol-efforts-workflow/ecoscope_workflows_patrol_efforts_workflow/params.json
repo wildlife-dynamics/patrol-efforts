@@ -443,16 +443,14 @@
             "discriminator": {
               "mapping": {
                 "count": "#/$defs/TallySummaryParam",
+                "coverage_area": "#/$defs/CoverageSummaryParam",
                 "max": "#/$defs/NumericSummaryParam",
                 "mean": "#/$defs/NumericSummaryParam",
                 "median": "#/$defs/NumericSummaryParam",
-                "merged_coverage_area": "#/$defs/CoverageSummaryParam",
                 "min": "#/$defs/NumericSummaryParam",
                 "night_day_ratio": "#/$defs/NightDayRatioSummaryParam",
                 "nunique": "#/$defs/TallySummaryParam",
-                "sum": "#/$defs/NumericSummaryParam",
-                "unique": "#/$defs/TallySummaryParam",
-                "unmerged_coverage_area": "#/$defs/CoverageSummaryParam"
+                "sum": "#/$defs/NumericSummaryParam"
               },
               "propertyName": "aggregator"
             },
@@ -788,17 +786,23 @@
           "type": "string"
         },
         "aggregator": {
+          "const": "coverage_area",
           "enum": [
-            "merged_coverage_area",
-            "unmerged_coverage_area"
+            "coverage_area"
           ],
-          "title": "Aggregator",
+          "title": "Statistic",
           "type": "string"
         },
+        "merged": {
+          "default": true,
+          "description": "Merge overlapping swaths before measuring (union); otherwise sum per-segment areas.",
+          "title": "Merged",
+          "type": "boolean"
+        },
         "swath_width_meters": {
-          "default": null,
-          "description": "Full corridor width in meters (defaults to 500).",
-          "title": "Swath Width Meters",
+          "default": 500.0,
+          "description": "Full corridor width in meters.",
+          "title": "Swath Width (m)",
           "type": "number"
         },
         "decimal_places": {
@@ -827,7 +831,7 @@
           "enum": [
             "night_day_ratio"
           ],
-          "title": "Aggregator",
+          "title": "Statistic",
           "type": "string"
         },
         "decimal_places": {
@@ -859,7 +863,7 @@
             "mean",
             "median"
           ],
-          "title": "Aggregator",
+          "title": "Statistic",
           "type": "string"
         },
         "column": {
@@ -900,7 +904,7 @@
       "type": "object"
     },
     "TallySummaryParam": {
-      "description": "Count-style metric (count / nunique / unique) over a single column.",
+      "description": "Count-style metric (count / nunique) over a single column.",
       "properties": {
         "display_name": {
           "description": "Column header shown in the summary table.",
@@ -910,10 +914,9 @@
         "aggregator": {
           "enum": [
             "count",
-            "nunique",
-            "unique"
+            "nunique"
           ],
-          "title": "Aggregator",
+          "title": "Statistic",
           "type": "string"
         },
         "column": {
