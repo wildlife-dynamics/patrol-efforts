@@ -10,8 +10,8 @@ base:
       data_source:
         name: "er_asia"
     time_range:
-      since: "2026-05-01T00:00:00"
-      until: "2026-05-06T23:59:59"
+      since: "2015-01-10T00:00:00"
+      until: "2015-02-28T23:59:59"
       timezone:
         label: "UTC (UTC+00:00)"
         tzCode: "UTC"
@@ -58,8 +58,8 @@ coverage-distance:
       data_source:
         name: "er_asia"
     time_range:
-      since: "2026-05-01T00:00:00"
-      until: "2026-05-06T23:59:59"
+      since: "2015-01-10T00:00:00"
+      until: "2015-02-28T23:59:59"
       timezone:
         label: "UTC (UTC+00:00)"
         tzCode: "UTC"
