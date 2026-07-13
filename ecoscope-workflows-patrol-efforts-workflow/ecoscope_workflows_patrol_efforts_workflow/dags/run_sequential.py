@@ -10,6 +10,9 @@ from ecoscope.platform.tasks.analysis import (
     set_patrol_summary_metrics as set_patrol_summary_metrics,
 )
 from ecoscope.platform.tasks.analysis import summarize_df as summarize_df
+from ecoscope.platform.tasks.config import (
+    set_list_of_string_vars as set_list_of_string_vars,
+)
 from ecoscope.platform.tasks.config import set_string_var as set_string_var
 from ecoscope.platform.tasks.config import set_workflow_details as set_workflow_details
 from ecoscope.platform.tasks.filter import (
@@ -763,6 +766,23 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
+    summary_groupby = (
+        task(set_list_of_string_vars)
+        .validate()
+        .set_task_instance_id("summary_groupby")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(**(params.get("summary_groupby") or {}))
+        .call()
+    )
+
     summary_metrics = (
         task(set_patrol_summary_metrics)
         .validate()
@@ -795,6 +815,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             reset_index=True,
+            groupby_cols=summary_groupby,
             summary_params=summary_metrics,
             **(params.get("summary_table_df") or {}),
         )

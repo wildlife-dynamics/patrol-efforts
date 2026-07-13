@@ -87,16 +87,19 @@ rjsf-overrides:
         opacity: 0.5
 
     # --- Configurable Summary Table: category column (groupby_cols) ---
-    "Patrol Effort Summary.properties.summary_table_df.properties.groupby_cols.title": "Aggregator"
-    "Patrol Effort Summary.properties.summary_table_df.properties.groupby_cols.description": "Column to aggregate (group) summary rows by. Default: patrol subject (ranger). Other options: patrol_type__value, patrol_status."
-    "Patrol Effort Summary.properties.summary_table_df.properties.groupby_cols.default": ["patrol_subject"]
-    "Patrol Effort Summary.properties.summary_table_df.properties.groupby_cols.items.oneOf":
+    "Patrol Effort Summary.properties.summary_groupby.title": ""
+    "Patrol Effort Summary.properties.summary_groupby.properties.vars.title": "Aggregator"
+    "Patrol Effort Summary.properties.summary_groupby.properties.vars.description": "Column to aggregate (group) summary rows by. Default: patrol subject (ranger). Other options: patrol_type__value, patrol_status."
+    "Patrol Effort Summary.properties.summary_groupby.properties.vars.default": ["patrol_subject"]
+    "Patrol Effort Summary.properties.summary_groupby.properties.vars.items.oneOf":
       - {const: "patrol_subject", title: "Patrol Subject"}
       - {const: "patrol_type__value", title: "Patrol Type"}
       - {const: "patrol_status", title: "Patrol Status"}
 
     # --- Configurable Summary Table: preset metric list (set_patrol_summary_metrics) ---
-    # Defaults (all six current metrics) come from the task signature.
+    # Defaults (all six current metrics) come from the task signature. Blank the
+    # task-instance header so only the array field's title renders (no duplicate).
+    "Patrol Effort Summary.properties.summary_metrics.title": ""
     "Patrol Effort Summary.properties.summary_metrics.properties.metrics.title": "Summary Metrics"
 
     # --- Patrols & Events Map: per-layer category colour selectors (classifier) ---
@@ -126,11 +129,11 @@ rjsf-overrides:
 
   uiSchema:
     Filter Data.patrol_filters.filter_point_coords.items.ui:options.label: false
-    # Aggregator (category column) above the metric rows, despite summary_metrics
-    # preceding summarize_df in the DAG.
-    "Patrol Effort Summary.ui:order":
-      - summary_table_df
-      - "*"
+    # Preset metric rows: the union selector already names the branch, so blank
+    # the selected branch's object title and hide the redundant discriminator
+    # dropdown (its value is auto-filled from the branch default).
+    "Patrol Effort Summary.summary_metrics.metrics.items.ui:title": " "
+    "Patrol Effort Summary.summary_metrics.metrics.items.metric.ui:widget": hidden
     # Render the Patrols & Events Map card AFTER Patrol Effort Summary, even though
     # its colour-selector tasks must be declared earlier (before split_groups).
     ui:order:
@@ -429,6 +432,12 @@ workflow:
     type: task-group
     description: "Per-category patrol metrics. Choose the aggregator column and which metrics to show."
     tasks:
+      # The card follows task order: Aggregator (its own tiny task) above the
+      # metric rows; summarize_df is fully partial-bound and stays off the form.
+      - name: Aggregator
+        id: summary_groupby
+        task: set_list_of_string_vars
+
       - name: Summary Metrics
         id: summary_metrics
         task: set_patrol_summary_metrics
@@ -438,6 +447,7 @@ workflow:
         task: summarize_df
         partial:
           reset_index: true
+          groupby_cols: ${{ workflow.summary_groupby.return }}
           summary_params: ${{ workflow.summary_metrics.return }}
         mapvalues:
           argnames: df

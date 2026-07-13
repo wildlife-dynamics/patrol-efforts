@@ -26,8 +26,8 @@ base:
       var: "patrol_subject"
     set_event_color_column:
       var: "event_type"
-    summary_table_df:
-      groupby_cols: ["patrol_subject"]
+    summary_groupby:
+      vars: ["patrol_subject"]
     summary_metrics:
       metrics:
         - {metric: patrol_count}
@@ -71,8 +71,8 @@ base:
 #       var: "patrol_subject"
 #     set_event_color_column:
 #       var: "event_type"
-#     summary_table_df:
-#       groupby_cols: ["patrol_subject"]
+#     summary_groupby:
+#       vars: ["patrol_subject"]
 #     summary_metrics:
 #       metrics:
 #         - {metric: patrol_count}

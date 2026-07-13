@@ -510,6 +510,41 @@
       "description": "Per-category patrol metrics. Choose the aggregator column and which metrics to show.",
       "ecoscope:task_group": true,
       "properties": {
+        "summary_groupby": {
+          "additionalProperties": false,
+          "properties": {
+            "vars": {
+              "items": {
+                "type": "string",
+                "oneOf": [
+                  {
+                    "const": "patrol_subject",
+                    "title": "Patrol Subject"
+                  },
+                  {
+                    "const": "patrol_type__value",
+                    "title": "Patrol Type"
+                  },
+                  {
+                    "const": "patrol_status",
+                    "title": "Patrol Status"
+                  }
+                ]
+              },
+              "title": "Aggregator",
+              "type": "array",
+              "description": "Column to aggregate (group) summary rows by. Default: patrol subject (ranger). Other options: patrol_type__value, patrol_status.",
+              "default": [
+                "patrol_subject"
+              ]
+            }
+          },
+          "required": [
+            "vars"
+          ],
+          "type": "object",
+          "title": ""
+        },
         "summary_metrics": {
           "additionalProperties": false,
           "properties": {
@@ -580,40 +615,7 @@
           },
           "type": "object",
           "required": [],
-          "title": "Summary Metrics"
-        },
-        "summary_table_df": {
-          "additionalProperties": false,
-          "properties": {
-            "groupby_cols": {
-              "default": [
-                "patrol_subject"
-              ],
-              "items": {
-                "type": "string",
-                "oneOf": [
-                  {
-                    "const": "patrol_subject",
-                    "title": "Patrol Subject"
-                  },
-                  {
-                    "const": "patrol_type__value",
-                    "title": "Patrol Type"
-                  },
-                  {
-                    "const": "patrol_status",
-                    "title": "Patrol Status"
-                  }
-                ]
-              },
-              "title": "Aggregator",
-              "type": "array",
-              "description": "Column to aggregate (group) summary rows by. Default: patrol subject (ranger). Other options: patrol_type__value, patrol_status."
-            }
-          },
-          "required": [],
-          "type": "object",
-          "title": "Summarize Patrol Effort"
+          "title": ""
         }
       }
     },
@@ -927,6 +929,7 @@
       "properties": {
         "metric": {
           "const": "area_covered",
+          "default": "area_covered",
           "enum": [
             "area_covered"
           ],
@@ -946,9 +949,6 @@
           "type": "number"
         }
       },
-      "required": [
-        "metric"
-      ],
       "title": "Area Covered",
       "type": "object"
     },
@@ -997,6 +997,7 @@
       "properties": {
         "metric": {
           "const": "custom",
+          "default": "custom",
           "enum": [
             "custom"
           ],
@@ -1037,7 +1038,6 @@
         }
       },
       "required": [
-        "metric",
         "param"
       ],
       "title": "Custom",
@@ -1132,6 +1132,7 @@
       "properties": {
         "metric": {
           "const": "patrol_count",
+          "default": "patrol_count",
           "enum": [
             "patrol_count"
           ],
@@ -1139,9 +1140,6 @@
           "type": "string"
         }
       },
-      "required": [
-        "metric"
-      ],
       "title": "Patrol Count",
       "type": "object"
     },
@@ -1149,6 +1147,7 @@
       "properties": {
         "metric": {
           "const": "patrol_days",
+          "default": "patrol_days",
           "enum": [
             "patrol_days"
           ],
@@ -1156,9 +1155,6 @@
           "type": "string"
         }
       },
-      "required": [
-        "metric"
-      ],
       "title": "Patrol Days",
       "type": "object"
     },
@@ -1196,6 +1192,7 @@
       "properties": {
         "metric": {
           "const": "total_distance",
+          "default": "total_distance",
           "enum": [
             "total_distance"
           ],
@@ -1212,9 +1209,6 @@
           "type": "string"
         }
       },
-      "required": [
-        "metric"
-      ],
       "title": "Total Distance",
       "type": "object"
     },
@@ -1222,6 +1216,7 @@
       "properties": {
         "metric": {
           "const": "total_duration",
+          "default": "total_duration",
           "enum": [
             "total_duration"
           ],
@@ -1238,9 +1233,6 @@
           "type": "string"
         }
       },
-      "required": [
-        "metric"
-      ],
       "title": "Total Duration",
       "type": "object"
     },
@@ -1350,9 +1342,19 @@
     },
     "Patrol Effort Summary": {
       "ui:order": [
-        "summary_table_df",
-        "*"
-      ]
+        "summary_groupby",
+        "summary_metrics"
+      ],
+      "summary_metrics": {
+        "metrics": {
+          "items": {
+            "ui:title": " ",
+            "metric": {
+              "ui:widget": "hidden"
+            }
+          }
+        }
+      }
     },
     "Patrol Coverage Map": {
       "ui:order": [

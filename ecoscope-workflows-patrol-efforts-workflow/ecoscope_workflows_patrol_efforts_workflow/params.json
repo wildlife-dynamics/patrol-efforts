@@ -435,6 +435,23 @@
       "required": [],
       "title": "Filters"
     },
+    "summary_groupby": {
+      "additionalProperties": false,
+      "properties": {
+        "vars": {
+          "items": {
+            "type": "string"
+          },
+          "title": "",
+          "type": "array"
+        }
+      },
+      "required": [
+        "vars"
+      ],
+      "type": "object",
+      "title": "Aggregator"
+    },
     "summary_metrics": {
       "additionalProperties": false,
       "properties": {
@@ -506,23 +523,6 @@
       "type": "object",
       "required": [],
       "title": "Summary Metrics"
-    },
-    "summary_table_df": {
-      "additionalProperties": false,
-      "properties": {
-        "groupby_cols": {
-          "default": null,
-          "items": {
-            "type": "string"
-          },
-          "title": "Groupby Cols",
-          "type": "array",
-          "description": "The columns to group by. If None, the summary is calculated for the entire DataFrame."
-        }
-      },
-      "required": [],
-      "type": "object",
-      "title": "Summarize Patrol Effort"
     },
     "coverage_meshgrid": {
       "additionalProperties": false,
@@ -816,6 +816,7 @@
       "properties": {
         "metric": {
           "const": "area_covered",
+          "default": "area_covered",
           "enum": [
             "area_covered"
           ],
@@ -835,9 +836,6 @@
           "type": "number"
         }
       },
-      "required": [
-        "metric"
-      ],
       "title": "Area Covered",
       "type": "object"
     },
@@ -886,6 +884,7 @@
       "properties": {
         "metric": {
           "const": "custom",
+          "default": "custom",
           "enum": [
             "custom"
           ],
@@ -926,7 +925,6 @@
         }
       },
       "required": [
-        "metric",
         "param"
       ],
       "title": "Custom",
@@ -1021,6 +1019,7 @@
       "properties": {
         "metric": {
           "const": "patrol_count",
+          "default": "patrol_count",
           "enum": [
             "patrol_count"
           ],
@@ -1028,9 +1027,6 @@
           "type": "string"
         }
       },
-      "required": [
-        "metric"
-      ],
       "title": "Patrol Count",
       "type": "object"
     },
@@ -1038,6 +1034,7 @@
       "properties": {
         "metric": {
           "const": "patrol_days",
+          "default": "patrol_days",
           "enum": [
             "patrol_days"
           ],
@@ -1045,9 +1042,6 @@
           "type": "string"
         }
       },
-      "required": [
-        "metric"
-      ],
       "title": "Patrol Days",
       "type": "object"
     },
@@ -1085,6 +1079,7 @@
       "properties": {
         "metric": {
           "const": "total_distance",
+          "default": "total_distance",
           "enum": [
             "total_distance"
           ],
@@ -1101,9 +1096,6 @@
           "type": "string"
         }
       },
-      "required": [
-        "metric"
-      ],
       "title": "Total Distance",
       "type": "object"
     },
@@ -1111,6 +1103,7 @@
       "properties": {
         "metric": {
           "const": "total_duration",
+          "default": "total_duration",
           "enum": [
             "total_duration"
           ],
@@ -1127,9 +1120,6 @@
           "type": "string"
         }
       },
-      "required": [
-        "metric"
-      ],
       "title": "Total Duration",
       "type": "object"
     },
@@ -1242,8 +1232,8 @@
       "set_event_color_column",
       "base_map_defs",
       "patrol_filters",
+      "summary_groupby",
       "summary_metrics",
-      "summary_table_df",
       "coverage_meshgrid",
       "grouped_coverage_density",
       "event_meshgrid"
