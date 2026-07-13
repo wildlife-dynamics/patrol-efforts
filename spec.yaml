@@ -120,9 +120,7 @@ rjsf-overrides:
     "Patrol & Event Density Map.properties.coverage_weighting.properties.sum_column.title": "Calculate Patrol Effort per Cell"
     "Patrol & Event Density Map.properties.coverage_weighting.properties.sum_column.description": "Weight each grid cell by total patrol time (hours) or distance travelled (km)."
     "Patrol & Event Density Map.properties.coverage_weighting.properties.sum_column.default": "timespan_seconds"
-    "Patrol & Event Density Map.properties.coverage_weighting.properties.sum_column.oneOf":
-      - {const: "timespan_seconds", title: "Time"}
-      - {const: "dist_meters", title: "Distance"}
+    # Time/Distance option labels come from the task schema (_labeled_weighting).
     "Patrol & Event Density Map.properties.density_grid_options.title": ""
 
     # --- Filter Data: combined filter card (applies to tracks + events) ---
@@ -147,6 +145,21 @@ rjsf-overrides:
       - {"ui:options": {"label": false}, "metric": {"ui:widget": "hidden"}}
       - {"ui:options": {"label": false}, "metric": {"ui:widget": "hidden"}}
       - {"ui:options": {"label": false}, "metric": {"ui:widget": "hidden"}}
+    # Grid Cell Size union: hide the per-branch heading + duplicate inner
+    # discriminator select (same pattern as patrols / subject-tracking).
+    "Patrol & Event Density Map.density_grid_options.auto_scale_or_custom_cell_size":
+      anyOf:
+        - ui:help: Auto-scale for an optimized grid cell size based on the workflow data or Customize to set a specific grid cell size.
+          ui:options:
+            label: false
+          auto_scale_or_custom:
+            ui:widget: hidden
+        - ui:options:
+            label: false
+          auto_scale_or_custom:
+            ui:widget: hidden
+      auto_scale_or_custom:
+        ui:widget: hidden
     # Render the Patrols & Events Map card AFTER Patrol Effort Summary, even though
     # its colour-selector tasks must be declared earlier (before split_groups).
     ui:order:

@@ -375,13 +375,19 @@
       "properties": {
         "sum_column": {
           "default": "timespan_seconds",
-          "enum": [
-            "timespan_seconds",
-            "dist_meters"
-          ],
           "title": "Sum Column",
           "type": "string",
-          "description": "Weight each grid cell by total patrol time or distance travelled."
+          "description": "Weight each grid cell by total patrol time or distance travelled.",
+          "oneOf": [
+            {
+              "const": "timespan_seconds",
+              "title": "Time"
+            },
+            {
+              "const": "dist_meters",
+              "title": "Distance"
+            }
+          ]
         }
       },
       "type": "object",
@@ -392,7 +398,7 @@
       "additionalProperties": false,
       "properties": {
         "opacity": {
-          "default": 0.4,
+          "default": 0.7,
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Heatmap Layer Opacity",

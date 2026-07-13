@@ -443,10 +443,6 @@
           "properties": {
             "sum_column": {
               "default": "timespan_seconds",
-              "enum": [
-                "timespan_seconds",
-                "dist_meters"
-              ],
               "title": "Calculate Patrol Effort per Cell",
               "type": "string",
               "description": "Weight each grid cell by total patrol time (hours) or distance travelled (km).",
@@ -470,7 +466,7 @@
           "additionalProperties": false,
           "properties": {
             "opacity": {
-              "default": 0.4,
+              "default": 0.7,
               "maximum": 1.0,
               "minimum": 0.0,
               "title": "Heatmap Layer Opacity",
@@ -1284,7 +1280,31 @@
           "opacity",
           "auto_scale_or_custom_cell_size",
           "crs"
-        ]
+        ],
+        "auto_scale_or_custom_cell_size": {
+          "anyOf": [
+            {
+              "ui:help": "Auto-scale for an optimized grid cell size based on the workflow data or Customize to set a specific grid cell size.",
+              "ui:options": {
+                "label": false
+              },
+              "auto_scale_or_custom": {
+                "ui:widget": "hidden"
+              }
+            },
+            {
+              "ui:options": {
+                "label": false
+              },
+              "auto_scale_or_custom": {
+                "ui:widget": "hidden"
+              }
+            }
+          ],
+          "auto_scale_or_custom": {
+            "ui:widget": "hidden"
+          }
+        }
       }
     },
     "Filter Data": {
