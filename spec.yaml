@@ -1,8 +1,8 @@
 id: patrol_efforts
 
 requirements:
-  # DEV MODE — developing the summarize_df coverage aggregators +
-  # calculate_patrol_coverage against the editable local ecoscope checkout
+  # DEV MODE — developing the summarize_df coverage aggregator
+  # against the editable local ecoscope checkout
   # (branch feat/patrol-coverage-tasks). ext-custom must ALSO be editable here:
   # the published ext-custom conda recipe hard-depends on conda ecoscope-platform
   # (>=2.11.6), which pins pandera 0.24 and conflicts with the editable ecoscope
