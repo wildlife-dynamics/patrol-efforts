@@ -952,47 +952,6 @@
       "title": "Area Covered",
       "type": "object"
     },
-    "CoverageSummaryParam": {
-      "description": "Ground area (km\u00b2) covered by buffering track segments. Has no column.",
-      "properties": {
-        "display_name": {
-          "description": "Column header shown in the summary table.",
-          "title": "Display Name",
-          "type": "string"
-        },
-        "aggregator": {
-          "const": "coverage_area",
-          "enum": [
-            "coverage_area"
-          ],
-          "title": "Statistic",
-          "type": "string"
-        },
-        "merged": {
-          "default": true,
-          "description": "Merge overlapping swaths before measuring (union); otherwise sum per-segment areas.",
-          "title": "Merged",
-          "type": "boolean"
-        },
-        "swath_width_meters": {
-          "default": 500.0,
-          "description": "Full corridor width in meters.",
-          "title": "Swath Width (m)",
-          "type": "number"
-        },
-        "decimal_places": {
-          "default": 2,
-          "title": "Decimal Places",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "display_name",
-        "aggregator"
-      ],
-      "title": "Area Covered Metric",
-      "type": "object"
-    },
     "CustomMetric": {
       "properties": {
         "metric": {
@@ -1009,7 +968,6 @@
           "discriminator": {
             "mapping": {
               "count": "#/$defs/TallySummaryParam",
-              "coverage_area": "#/$defs/CoverageSummaryParam",
               "max": "#/$defs/NumericSummaryParam",
               "mean": "#/$defs/NumericSummaryParam",
               "median": "#/$defs/NumericSummaryParam",
@@ -1026,9 +984,6 @@
             },
             {
               "$ref": "#/$defs/NumericSummaryParam"
-            },
-            {
-              "$ref": "#/$defs/CoverageSummaryParam"
             },
             {
               "$ref": "#/$defs/NightDayRatioSummaryParam"
