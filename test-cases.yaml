@@ -135,49 +135,49 @@ grouped:
         - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
           opacity: 1.0
 
-# er_asia:
-#   name: ER Asia
-#   description: Live EarthRanger (er-asia), 1-6 May 2026, demo_patrol + wildlife sightings.
-#   mock_io: false
-#   params:
-#     workflow_details:
-#       name: "Patrol Efforts"
-#       description: "Per-category patrol effort summary, coverage and event density."
-#     er_client_name:
-#       data_source:
-#         name: "er_asia"
-#     time_range:
-#       since: "2026-05-01T00:00:00"
-#       until: "2026-05-06T23:59:59"
-#       timezone:
-#         label: "UTC (UTC+00:00)"
-#         tzCode: "UTC"
-#         name: "(UTC+00:00) UTC"
-#         utc: "+00:00"
-#     er_patrol_and_events_params:
-#       patrol_types: ["demo_patrol"]
-#       event_types: ["wildlife_sighting_rep"]
-#     groupers:
-#       groupers: []
-#     set_traj_color_column:
-#       var: "patrol_subject"
-#     set_event_color_column:
-#       var: "event_type"
-#     summary_groupby:
-#       vars: ["patrol_subject"]
-#     summary_metrics:
-#       metrics:
-#         - {metric: patrol_count}
-#         - {metric: total_distance, unit: km}
-#         - {metric: total_duration, unit: h}
-#         - {metric: patrol_days}
-#         - {metric: area_covered_merged, swath_width_meters: 500.0}
-#         - {metric: area_covered_unmerged, swath_width_meters: 500.0}
-#     coverage_weighting:
-#       sum_column: timespan_seconds
-#     base_map_defs:
-#       base_maps:
-#         - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
-#           opacity: 1.0
-#         - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-#           opacity: 0.5
+er_asia:
+  name: ER Asia
+  description: Live EarthRanger (er-asia), 1-6 May 2026, demo_patrol + wildlife sightings.
+  mock_io: false
+  params:
+    workflow_details:
+      name: "Patrol Efforts"
+      description: "Per-category patrol effort summary, coverage and event density."
+    er_client_name:
+      data_source:
+        name: "er_asia"
+    time_range:
+      since: "2026-05-01T00:00:00"
+      until: "2026-05-06T23:59:59"
+      timezone:
+        label: "UTC (UTC+00:00)"
+        tzCode: "UTC"
+        name: "(UTC+00:00) UTC"
+        utc: "+00:00"
+    er_patrol_and_events_params:
+      patrol_types: ["demo_patrol"]
+      event_types: ["wildlife_sighting_rep"]
+    groupers:
+      groupers: []
+    set_traj_color_column:
+      var: "patrol_subject"
+    set_event_color_column:
+      var: "event_type"
+    summary_groupby:
+      vars: ["patrol_subject"]
+    summary_metrics:
+      metrics:
+        - {metric: patrol_count}
+        - {metric: total_distance, unit: km}
+        - {metric: total_duration, unit: h}
+        - {metric: patrol_days}
+        - {metric: area_covered_merged, swath_width_meters: 500.0}
+        - {metric: area_covered_unmerged, swath_width_meters: 500.0}
+    coverage_weighting:
+      sum_column: timespan_seconds
+    base_map_defs:
+      base_maps:
+        - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
+          opacity: 1.0
+        - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          opacity: 0.5
