@@ -947,7 +947,7 @@
           "type": "string"
         },
         "swath_width_meters": {
-          "default": null,
+          "default": 500.0,
           "description": "Full corridor width in meters (defaults to 500).",
           "title": "Swath Width Meters",
           "type": "number"

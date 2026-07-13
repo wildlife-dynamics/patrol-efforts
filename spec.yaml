@@ -59,6 +59,10 @@ requirements:
   #   channel: https://repo.prefix.dev/ecoscope-workflows-custom/
 
 rjsf-overrides:
+  $defs:
+    # Swath width on coverage metric rows: the task resolves null -> 500, but
+    # newly added rows in the form should prefill 500 too.
+    CoverageSummaryParam.properties.swath_width_meters.default: 500.0
   properties:
     # Patrols and their events are fetched together (one combined params object).
     "Patrol and Event Types.properties.er_patrol_and_events_params.properties.patrol_types.ecoscope:transform":
