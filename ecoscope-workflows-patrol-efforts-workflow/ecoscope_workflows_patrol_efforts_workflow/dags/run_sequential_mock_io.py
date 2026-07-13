@@ -1050,7 +1050,11 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .partial(
             drop_columns=[],
             retain_columns=[],
-            rename_columns={"patrol_subject": "Ranger"},
+            rename_columns={
+                "patrol_subject": "Ranger",
+                "patrol_type__value": "Patrol Type",
+                "patrol_status": "Patrol Status",
+            },
             raise_if_not_found=False,
             **(params.get("summary_rename") or {}),
         )
