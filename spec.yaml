@@ -63,6 +63,10 @@ rjsf-overrides:
     # Swath width on coverage metric rows: the task resolves null -> 500, but
     # newly added rows in the form should prefill 500 too.
     CoverageSummaryParam.properties.swath_width_meters.default: 500.0
+    CoverageSummaryParam.properties.swath_width_meters.title: "Swath Width (m)"
+    # `unique` (list of distinct values) is not a tabular summary metric —
+    # offer only count / nunique in the form. (Still accepted by the task.)
+    TallySummaryParam.properties.aggregator.enum: ["count", "nunique"]
   properties:
     # Patrols and their events are fetched together (one combined params object).
     "Patrol and Event Types.properties.er_patrol_and_events_params.properties.patrol_types.ecoscope:transform":
@@ -84,7 +88,7 @@ rjsf-overrides:
           type: spatial_feature_group
           depends_on: properties.er_client_name.properties.data_source.properties.name
 
-    "Map Configuration.properties.base_map_defs.properties.base_maps.default":
+    "base_map_defs.properties.base_maps.default":
       - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
         opacity: 1.0
       - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
@@ -168,6 +172,7 @@ rjsf-overrides:
       - Filter Data
       - Patrol Effort Summary
       - Map Configuration
+      - base_map_defs
       - Patrol Coverage Map
       - Event Density Map
 
@@ -273,13 +278,12 @@ workflow:
     partial:
       var: "Event Density Map"
 
-  # All map configuration in one card: the per-layer colour-category selectors
-  # for the Patrols & Events map plus the shared base layers. Declared here (the
-  # colour selectors must precede split_groups in the DAG); the form renders this
+  # Per-layer colour-category selectors for the Patrols & Events map. Declared
+  # here (they must precede split_groups in the DAG); the form renders this
   # card AFTER Patrol Effort Summary via the uiSchema ui:order below.
   - title: Map Configuration
     type: task-group
-    description: "Colour the Patrols & Events map layers and choose the base layers."
+    description: "Colour the Patrols & Events map layers."
     tasks:
       - name: Track Colour Category
         id: set_traj_color_column
@@ -289,9 +293,10 @@ workflow:
         id: set_event_color_column
         task: set_string_var
 
-      - name: Map Base Layers
-        id: base_map_defs
-        task: set_base_maps
+  # Standalone card — the base layers are shared by all three maps.
+  - name: Map Base Layers
+    id: base_map_defs
+    task: set_base_maps
 
   # ---------- Filter Data (shared: patrol tracks + events) ----------
   - title: Filter Data
