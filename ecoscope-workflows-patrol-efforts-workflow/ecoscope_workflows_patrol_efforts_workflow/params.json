@@ -435,44 +435,81 @@
       "required": [],
       "title": "Filters"
     },
-    "summary_table_df": {
+    "summary_metrics": {
       "additionalProperties": false,
       "properties": {
-        "summary_params": {
+        "metrics": {
+          "default": [
+            {
+              "metric": "patrol_count"
+            },
+            {
+              "metric": "total_distance",
+              "unit": "km"
+            },
+            {
+              "metric": "total_duration",
+              "unit": "h"
+            },
+            {
+              "metric": "patrol_days"
+            },
+            {
+              "metric": "area_covered",
+              "merged": true,
+              "swath_width_meters": 500.0
+            },
+            {
+              "metric": "area_covered",
+              "merged": false,
+              "swath_width_meters": 500.0
+            }
+          ],
           "items": {
             "discriminator": {
               "mapping": {
-                "count": "#/$defs/TallySummaryParam",
-                "coverage_area": "#/$defs/CoverageSummaryParam",
-                "max": "#/$defs/NumericSummaryParam",
-                "mean": "#/$defs/NumericSummaryParam",
-                "median": "#/$defs/NumericSummaryParam",
-                "min": "#/$defs/NumericSummaryParam",
-                "night_day_ratio": "#/$defs/NightDayRatioSummaryParam",
-                "nunique": "#/$defs/TallySummaryParam",
-                "sum": "#/$defs/NumericSummaryParam"
+                "area_covered": "#/$defs/AreaCoveredMetric",
+                "custom": "#/$defs/CustomMetric",
+                "patrol_count": "#/$defs/PatrolCountMetric",
+                "patrol_days": "#/$defs/PatrolDaysMetric",
+                "total_distance": "#/$defs/TotalDistanceMetric",
+                "total_duration": "#/$defs/TotalDurationMetric"
               },
-              "propertyName": "aggregator"
+              "propertyName": "metric"
             },
             "oneOf": [
               {
-                "$ref": "#/$defs/TallySummaryParam"
+                "$ref": "#/$defs/PatrolCountMetric"
               },
               {
-                "$ref": "#/$defs/NumericSummaryParam"
+                "$ref": "#/$defs/PatrolDaysMetric"
               },
               {
-                "$ref": "#/$defs/CoverageSummaryParam"
+                "$ref": "#/$defs/TotalDistanceMetric"
               },
               {
-                "$ref": "#/$defs/NightDayRatioSummaryParam"
+                "$ref": "#/$defs/TotalDurationMetric"
+              },
+              {
+                "$ref": "#/$defs/AreaCoveredMetric"
+              },
+              {
+                "$ref": "#/$defs/CustomMetric"
               }
             ]
           },
-          "title": "Summary Params",
+          "title": "Metrics",
           "type": "array",
-          "description": "The parameters that define how to calculate summary statistics."
-        },
+          "description": "Metrics shown as columns in the patrol summary table. Add or remove rows to customize."
+        }
+      },
+      "type": "object",
+      "required": [],
+      "title": "Summary Metrics"
+    },
+    "summary_table_df": {
+      "additionalProperties": false,
+      "properties": {
         "groupby_cols": {
           "default": null,
           "items": {
@@ -483,9 +520,7 @@
           "description": "The columns to group by. If None, the summary is calculated for the entire DataFrame."
         }
       },
-      "required": [
-        "summary_params"
-      ],
+      "required": [],
       "type": "object",
       "title": "Summarize Patrol Effort"
     },
@@ -777,6 +812,35 @@
       "title": "TrajectorySegmentFilter",
       "type": "object"
     },
+    "AreaCoveredMetric": {
+      "properties": {
+        "metric": {
+          "const": "area_covered",
+          "enum": [
+            "area_covered"
+          ],
+          "title": "Metric",
+          "type": "string"
+        },
+        "merged": {
+          "default": true,
+          "description": "Merge overlapping swaths before measuring (union); otherwise sum per-segment areas.",
+          "title": "Merged",
+          "type": "boolean"
+        },
+        "swath_width_meters": {
+          "default": 500.0,
+          "description": "Full corridor width in meters.",
+          "title": "Swath Width (m)",
+          "type": "number"
+        }
+      },
+      "required": [
+        "metric"
+      ],
+      "title": "Area Covered",
+      "type": "object"
+    },
     "CoverageSummaryParam": {
       "description": "Ground area (km\u00b2) covered by buffering track segments. Has no column.",
       "properties": {
@@ -816,6 +880,56 @@
         "aggregator"
       ],
       "title": "Area Covered Metric",
+      "type": "object"
+    },
+    "CustomMetric": {
+      "properties": {
+        "metric": {
+          "const": "custom",
+          "enum": [
+            "custom"
+          ],
+          "title": "Metric",
+          "type": "string"
+        },
+        "param": {
+          "description": "Full metric definition.",
+          "discriminator": {
+            "mapping": {
+              "count": "#/$defs/TallySummaryParam",
+              "coverage_area": "#/$defs/CoverageSummaryParam",
+              "max": "#/$defs/NumericSummaryParam",
+              "mean": "#/$defs/NumericSummaryParam",
+              "median": "#/$defs/NumericSummaryParam",
+              "min": "#/$defs/NumericSummaryParam",
+              "night_day_ratio": "#/$defs/NightDayRatioSummaryParam",
+              "nunique": "#/$defs/TallySummaryParam",
+              "sum": "#/$defs/NumericSummaryParam"
+            },
+            "propertyName": "aggregator"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/TallySummaryParam"
+            },
+            {
+              "$ref": "#/$defs/NumericSummaryParam"
+            },
+            {
+              "$ref": "#/$defs/CoverageSummaryParam"
+            },
+            {
+              "$ref": "#/$defs/NightDayRatioSummaryParam"
+            }
+          ],
+          "title": " "
+        }
+      },
+      "required": [
+        "metric",
+        "param"
+      ],
+      "title": "Custom",
       "type": "object"
     },
     "NightDayRatioSummaryParam": {
@@ -903,6 +1017,40 @@
       "title": "Numeric Metric",
       "type": "object"
     },
+    "PatrolCountMetric": {
+      "properties": {
+        "metric": {
+          "const": "patrol_count",
+          "enum": [
+            "patrol_count"
+          ],
+          "title": "Metric",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric"
+      ],
+      "title": "Patrol Count",
+      "type": "object"
+    },
+    "PatrolDaysMetric": {
+      "properties": {
+        "metric": {
+          "const": "patrol_days",
+          "enum": [
+            "patrol_days"
+          ],
+          "title": "Metric",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric"
+      ],
+      "title": "Patrol Days",
+      "type": "object"
+    },
     "TallySummaryParam": {
       "description": "Count-style metric (count / nunique) over a single column.",
       "properties": {
@@ -931,6 +1079,58 @@
         "column"
       ],
       "title": "Count Metric",
+      "type": "object"
+    },
+    "TotalDistanceMetric": {
+      "properties": {
+        "metric": {
+          "const": "total_distance",
+          "enum": [
+            "total_distance"
+          ],
+          "title": "Metric",
+          "type": "string"
+        },
+        "unit": {
+          "default": "km",
+          "enum": [
+            "km",
+            "m"
+          ],
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric"
+      ],
+      "title": "Total Distance",
+      "type": "object"
+    },
+    "TotalDurationMetric": {
+      "properties": {
+        "metric": {
+          "const": "total_duration",
+          "enum": [
+            "total_duration"
+          ],
+          "title": "Metric",
+          "type": "string"
+        },
+        "unit": {
+          "default": "h",
+          "enum": [
+            "h",
+            "d"
+          ],
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric"
+      ],
+      "title": "Total Duration",
       "type": "object"
     },
     "Unit": {
@@ -1020,12 +1220,6 @@
         "trajectory_segment_filter"
       ]
     },
-    "summary_table_df": {
-      "ui:order": [
-        "summary_params",
-        "groupby_cols"
-      ]
-    },
     "coverage_meshgrid": {
       "ui:order": [
         "auto_scale_or_custom_cell_size",
@@ -1048,6 +1242,7 @@
       "set_event_color_column",
       "base_map_defs",
       "patrol_filters",
+      "summary_metrics",
       "summary_table_df",
       "coverage_meshgrid",
       "grouped_coverage_density",

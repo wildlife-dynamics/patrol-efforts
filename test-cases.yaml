@@ -28,13 +28,14 @@ base:
       var: "event_type"
     summary_table_df:
       groupby_cols: ["patrol_subject"]
-      summary_params:
-        - {display_name: "Patrol Count", aggregator: nunique, column: patrol_id}
-        - {display_name: "Total Distance (km)", aggregator: sum, column: dist_meters, original_unit: m, new_unit: km, decimal_places: 1}
-        - {display_name: "Total Duration (hrs)", aggregator: sum, column: timespan_seconds, original_unit: s, new_unit: h, decimal_places: 1}
-        - {display_name: "Patrol Days", aggregator: nunique, column: segment_start_date}
-        - {display_name: "Merged Area Covered (km²)", aggregator: coverage_area, merged: true, swath_width_meters: 500.0, decimal_places: 1}
-        - {display_name: "Unmerged Area Covered (km²)", aggregator: coverage_area, merged: false, swath_width_meters: 500.0, decimal_places: 1}
+    summary_metrics:
+      metrics:
+        - {metric: patrol_count}
+        - {metric: total_distance, unit: km}
+        - {metric: total_duration, unit: h}
+        - {metric: patrol_days}
+        - {metric: area_covered, merged: true, swath_width_meters: 500.0}
+        - {metric: area_covered, merged: false, swath_width_meters: 500.0}
     grouped_coverage_density:
       sum_column: timespan_seconds
     base_map_defs:
@@ -72,13 +73,14 @@ base:
 #       var: "event_type"
 #     summary_table_df:
 #       groupby_cols: ["patrol_subject"]
-#       summary_params:
-#         - {display_name: "Patrol Count", aggregator: nunique, column: patrol_id}
-#         - {display_name: "Total Distance (km)", aggregator: sum, column: dist_meters, original_unit: m, new_unit: km, decimal_places: 1}
-#         - {display_name: "Total Duration (hrs)", aggregator: sum, column: timespan_seconds, original_unit: s, new_unit: h, decimal_places: 1}
-#         - {display_name: "Patrol Days", aggregator: nunique, column: segment_start_date}
-#         - {display_name: "Merged Area Covered (km²)", aggregator: coverage_area, merged: true, swath_width_meters: 500.0, decimal_places: 1}
-#         - {display_name: "Unmerged Area Covered (km²)", aggregator: coverage_area, merged: false, swath_width_meters: 500.0, decimal_places: 1}
+#     summary_metrics:
+#       metrics:
+#         - {metric: patrol_count}
+#         - {metric: total_distance, unit: km}
+#         - {metric: total_duration, unit: h}
+#         - {metric: patrol_days}
+#         - {metric: area_covered, merged: true, swath_width_meters: 500.0}
+#         - {metric: area_covered, merged: false, swath_width_meters: 500.0}
 #     grouped_coverage_density:
 #       sum_column: timespan_seconds
 #     base_map_defs:

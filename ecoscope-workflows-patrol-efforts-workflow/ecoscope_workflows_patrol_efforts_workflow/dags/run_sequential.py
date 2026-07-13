@@ -6,6 +6,9 @@ from ecoscope.platform.tasks.analysis import (
     calculate_feature_density as calculate_feature_density,
 )
 from ecoscope.platform.tasks.analysis import create_meshgrid as create_meshgrid
+from ecoscope.platform.tasks.analysis import (
+    set_patrol_summary_metrics as set_patrol_summary_metrics,
+)
 from ecoscope.platform.tasks.analysis import summarize_df as summarize_df
 from ecoscope.platform.tasks.config import set_string_var as set_string_var
 from ecoscope.platform.tasks.config import set_workflow_details as set_workflow_details
@@ -760,6 +763,23 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
+    summary_metrics = (
+        task(set_patrol_summary_metrics)
+        .validate()
+        .set_task_instance_id("summary_metrics")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(**(params.get("summary_metrics") or {}))
+        .call()
+    )
+
     summary_table_df = (
         task(summarize_df)
         .validate()
@@ -773,7 +793,11 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             ],
             unpack_depth=1,
         )
-        .partial(reset_index=True, **(params.get("summary_table_df") or {}))
+        .partial(
+            reset_index=True,
+            summary_params=summary_metrics,
+            **(params.get("summary_table_df") or {}),
+        )
         .mapvalues(argnames=["df"], argvalues=split_traj_groups)
     )
 

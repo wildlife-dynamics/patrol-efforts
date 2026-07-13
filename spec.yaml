@@ -95,38 +95,9 @@ rjsf-overrides:
       - {const: "patrol_type__value", title: "Patrol Type"}
       - {const: "patrol_status", title: "Patrol Status"}
 
-    # --- Configurable Summary Table: metric list (summary_params) ---
-    "Patrol Effort Summary.properties.summary_table_df.properties.summary_params.title": "Summary Metrics"
-    "Patrol Effort Summary.properties.summary_table_df.properties.summary_params.description": "Columns shown in the summary table. Add or remove rows to customize. 'Merged/Unmerged Area Covered' use the Swath Width on the row."
-    "Patrol Effort Summary.properties.summary_table_df.properties.summary_params.default":
-      - display_name: "Patrol Count"
-        aggregator: nunique
-        column: patrol_id
-      - display_name: "Total Distance (km)"
-        aggregator: sum
-        column: dist_meters
-        original_unit: m
-        new_unit: km
-        decimal_places: 1
-      - display_name: "Total Duration (hrs)"
-        aggregator: sum
-        column: timespan_seconds
-        original_unit: s
-        new_unit: h
-        decimal_places: 1
-      - display_name: "Patrol Days"
-        aggregator: nunique
-        column: segment_start_date
-      - display_name: "Merged Area Covered (km²)"
-        aggregator: coverage_area
-        merged: true
-        swath_width_meters: 500.0
-        decimal_places: 1
-      - display_name: "Unmerged Area Covered (km²)"
-        aggregator: coverage_area
-        merged: false
-        swath_width_meters: 500.0
-        decimal_places: 1
+    # --- Configurable Summary Table: preset metric list (set_patrol_summary_metrics) ---
+    # Defaults (all six current metrics) come from the task signature.
+    "Patrol Effort Summary.properties.summary_metrics.properties.metrics.title": "Summary Metrics"
 
     # --- Patrols & Events Map: per-layer category colour selectors (classifier) ---
     "Patrols & Events Map.properties.set_traj_color_column.properties.var.title": "Colour Tracks By"
@@ -155,6 +126,11 @@ rjsf-overrides:
 
   uiSchema:
     Filter Data.patrol_filters.filter_point_coords.items.ui:options.label: false
+    # Aggregator (category column) above the metric rows, despite summary_metrics
+    # preceding summarize_df in the DAG.
+    "Patrol Effort Summary.ui:order":
+      - summary_table_df
+      - "*"
     # Render the Patrols & Events Map card AFTER Patrol Effort Summary, even though
     # its colour-selector tasks must be declared earlier (before split_groups).
     ui:order:
@@ -453,11 +429,16 @@ workflow:
     type: task-group
     description: "Per-category patrol metrics. Choose the aggregator column and which metrics to show."
     tasks:
+      - name: Summary Metrics
+        id: summary_metrics
+        task: set_patrol_summary_metrics
+
       - name: Summarize Patrol Effort
         id: summary_table_df
         task: summarize_df
         partial:
           reset_index: true
+          summary_params: ${{ workflow.summary_metrics.return }}
         mapvalues:
           argnames: df
           argvalues: ${{ workflow.split_traj_groups.return }}
