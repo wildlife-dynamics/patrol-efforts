@@ -902,7 +902,7 @@ workflow:
         task: apply_color_map
         partial:
           input_column_name: density_bins
-          colormap: viridis
+          colormap: RdYlGn_r
           output_column_name: density_colormap
         mapvalues:
           argnames: df

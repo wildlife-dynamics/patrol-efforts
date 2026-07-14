@@ -1511,7 +1511,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             input_column_name="density_bins",
-            colormap="viridis",
+            colormap="RdYlGn_r",
             output_column_name="density_colormap",
             **(params.get("coverage_colormap") or {}),
         )
