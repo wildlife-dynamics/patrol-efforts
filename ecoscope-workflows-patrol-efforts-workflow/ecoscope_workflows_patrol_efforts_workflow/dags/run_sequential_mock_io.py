@@ -1311,7 +1311,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-            filename_suffix="ranger_map",
+            filename_suffix="traj_map",
             **(params.get("map_ecomap_html") or {}),
         )
         .mapvalues(argnames=["text"], argvalues=map_ecomap)
@@ -1916,10 +1916,10 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
-    ranger_dashboard = (
+    patrol_dashboard = (
         task(gather_dashboard)
         .validate()
-        .set_task_instance_id("ranger_dashboard")
+        .set_task_instance_id("patrol_dashboard")
         .handle_errors()
         .with_tracing()
         .skipif(
@@ -1939,9 +1939,9 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             ],
             groupers=groupers,
             time_range=time_range,
-            **(params.get("ranger_dashboard") or {}),
+            **(params.get("patrol_dashboard") or {}),
         )
         .call()
     )
 
-    return ranger_dashboard
+    return patrol_dashboard

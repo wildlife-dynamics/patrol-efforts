@@ -793,7 +793,7 @@ workflow:
         task: persist_text
         partial:
           root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-          filename_suffix: ranger_map
+          filename_suffix: traj_map
         mapvalues:
           argnames: text
           argvalues: ${{ workflow.map_ecomap.return }}
@@ -1149,7 +1149,7 @@ workflow:
 
   # ---------- Dashboard ----------
   - name: Create Dashboard
-    id: ranger_dashboard
+    id: patrol_dashboard
     task: gather_dashboard
     partial:
       details: ${{ workflow.workflow_details.return }}
