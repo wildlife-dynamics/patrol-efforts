@@ -623,7 +623,7 @@ workflow:
           # One entry per Aggregator option — only the chosen ones are present
           # (raise_if_not_found false skips the rest).
           rename_columns:
-            patrol_subject: Ranger
+            patrol_subject: Patrol Subject
             patrol_type__value: Patrol Type
             patrol_status: Patrol Status
           raise_if_not_found: false

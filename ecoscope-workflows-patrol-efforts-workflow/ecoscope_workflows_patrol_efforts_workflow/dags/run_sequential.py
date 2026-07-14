@@ -1031,7 +1031,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             drop_columns=[],
             retain_columns=[],
             rename_columns={
-                "patrol_subject": "Ranger",
+                "patrol_subject": "Patrol Subject",
                 "patrol_type__value": "Patrol Type",
                 "patrol_status": "Patrol Status",
             },
