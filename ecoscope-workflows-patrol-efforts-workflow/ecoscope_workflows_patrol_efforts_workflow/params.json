@@ -952,15 +952,6 @@
       },
       "description": "Define your own metric: pick a column and statistic, with optional unit conversion.",
       "properties": {
-        "metric": {
-          "const": "custom",
-          "default": "custom",
-          "enum": [
-            "custom"
-          ],
-          "title": "Metric",
-          "type": "string"
-        },
         "display_name": {
           "description": "Column header shown in the summary table.",
           "title": "Display Name",
@@ -993,6 +984,15 @@
           "default": false,
           "title": "Convert Units",
           "type": "boolean"
+        },
+        "metric": {
+          "const": "custom",
+          "default": "custom",
+          "enum": [
+            "custom"
+          ],
+          "title": "Metric",
+          "type": "string"
         }
       },
       "required": [

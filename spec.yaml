@@ -44,10 +44,19 @@ requirements:
   - name: setuptools
     version: "<81"
     channel: conda-forge
+  # pydantic <2.9 required by editable ecoscope (>=2.9 breaks discriminated
+  # unions in apply_classification). Declared here so the emitted pixi.toml
+  # carries the pin through --install/--update solves (was a hand-patch).
+  - name: pydantic
+    version: ">=2.0.0,<2.9.0"
+    channel: conda-forge
   - name: ecoscope
     path: /Users/yunwu/MEP/wt-tasks/ecoscope
     editable: true
-    extras: ["platform", "mapping", "analysis"]
+    # plotting: ext-custom's draw_boxplot (ported on wt-release-candidate)
+    # eagerly imports plotly at package load; it lives in ecoscope's plotting
+    # extra. In a published install it arrives transitively via ecoscope-platform.
+    extras: ["platform", "mapping", "analysis", "plotting"]
   - name: ecoscope-workflows-ext-custom
     path: /Users/yunwu/MEP/wt-tasks/ecoscope-workflow-task-library/src/ecoscope-workflows-ext-custom
     editable: true
@@ -453,7 +462,7 @@ workflow:
       # "Patrol Days" metric (nunique) references.
       - name: Add Patrol Date
         id: traj_with_date
-        task: ecoscope_workflows_ext_custom.tasks.transformation.decompose_datetime
+        task: decompose_datetime
         partial:
           df: ${{ workflow.traj_rename_cols.return }}
           datetime_column: segment_start

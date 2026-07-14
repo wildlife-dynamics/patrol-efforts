@@ -6,7 +6,7 @@
 ```yaml
 # fingerprint:
 artifacts_sha256_basic: 0fc11e3b5db70b5dd9982f9dccf3c337ad22f370277940fa96322d425dcc928b
-artifacts_sha256_strict: 2959edfa6588bc9e5a5d1b45067ee3ea1bd237bc36dac5d2066697200a3c5fce
+artifacts_sha256_strict: caa53c695c8f3c426d31b34ecd988233950cc6ba99ce967f41a7a12b1b3c95d0
 installed_requirements:
 - channel: conda-forge
   name: python
@@ -35,8 +35,11 @@ installed_requirements:
 - channel: conda-forge
   name: setuptools
   version: {version: ==80.10.2}
+- channel: conda-forge
+  name: pydantic
+  version: {version: ==2.8.2}
 params_sha256: b29e92d15475f569895c18ee63b6e1feebfdad9670c6b75652f27bdcb6a32066
-spec_sha256: 51140e666c3a5e0d7e9feccaf654c930b98c3a68e5ce0a3aec02793781b6f816
+spec_sha256: a0d705289c9714a8c692bb715250cfd05abce8a488fb45c4f86f9cb97003e125
 
 ```
 

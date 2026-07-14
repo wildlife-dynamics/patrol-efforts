@@ -55,16 +55,16 @@ channel = "https://repo.prefix.dev/ecoscope-workflows-custom/"
 version = "<81"
 channel = "https://conda.anaconda.org/conda-forge/"
 
+[dependencies.pydantic]
+version = ">=2.0.0,<2.9.0"
+channel = "https://conda.anaconda.org/conda-forge/"
+
 [dependencies.click]
 version = ">=8.0.0,<9.0.0"
 channel = "https://conda.anaconda.org/conda-forge/"
 
 [dependencies.obstore]
 version = ">=0.6.0,<0.7.0"
-channel = "https://conda.anaconda.org/conda-forge/"
-
-[dependencies.pydantic]
-version = ">=2.0.0,<2.9.0"  # DEV patch: ecoscope needs <2.9.0
 channel = "https://conda.anaconda.org/conda-forge/"
 
 [dependencies."ruamel.yaml"]
@@ -82,6 +82,7 @@ extras = [
     "platform",
     "mapping",
     "analysis",
+    "plotting",
 ]
 
 [pypi-dependencies.ecoscope-workflows-ext-custom]
