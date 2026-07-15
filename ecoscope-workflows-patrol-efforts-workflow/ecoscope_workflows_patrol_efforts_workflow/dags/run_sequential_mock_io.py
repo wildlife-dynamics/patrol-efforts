@@ -411,9 +411,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             ],
             unpack_depth=1,
         )
-        .partial(
-            var="Event Density Map", **(params.get("set_event_density_title") or {})
-        )
+        .partial(var="Event Sum Map", **(params.get("set_event_density_title") or {}))
         .call()
     )
 
@@ -1190,6 +1188,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             legend={
                 "label_column": set_traj_color_column,
                 "color_column": "patrol_traj_colormap",
+                "title": "Tracks",
             },
             tooltip_columns=["patrol_subject", "Start", "Speed (kph)"],
             **(params.get("traj_polyline_layer") or {}),
@@ -1239,6 +1238,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             legend={
                 "label_column": set_event_color_column,
                 "color_column": "event_type_colormap",
+                "title": "Events",
             },
             tooltip_columns=["Event Time", "event_type"],
             **(params.get("event_point_layer") or {}),
@@ -1283,11 +1283,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             title=None,
             tile_layers=base_map_defs,
             north_arrow_style={"placement": "top-left"},
-            legend_style={
-                "title": "Tracks / Events",
-                "format_title": True,
-                "placement": "bottom-right",
-            },
+            legend_style={"format_title": True, "placement": "bottom-right"},
             static=False,
             max_zoom=20,
             widget_id=set_map_title,

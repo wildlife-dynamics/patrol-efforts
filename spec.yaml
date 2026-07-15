@@ -329,7 +329,7 @@ workflow:
     id: set_event_density_title
     task: set_string_var
     partial:
-      var: "Event Density Map"
+      var: "Event Sum Map"
 
   # Per-layer colour-category selectors for the Patrols & Events map. Declared
   # here (they must precede split_groups in the DAG); the form renders this
@@ -714,6 +714,7 @@ workflow:
           legend:
             label_column: ${{ workflow.set_traj_color_column.return }}
             color_column: patrol_traj_colormap
+            title: "Tracks"
           tooltip_columns: ["patrol_subject", "Start", "Speed (kph)"]
         mapvalues:
           argnames: geodataframe
@@ -750,6 +751,7 @@ workflow:
           legend:
             label_column: ${{ workflow.set_event_color_column.return }}
             color_column: event_type_colormap
+            title: "Events"
           tooltip_columns: ["Event Time", "event_type"]
         mapvalues:
           argnames: geodataframe
@@ -777,8 +779,10 @@ workflow:
           tile_layers: ${{ workflow.base_map_defs.return }}
           north_arrow_style:
             placement: top-left
+          # Per-layer legend titles ("Tracks" / "Events") drive two stacked
+          # legend boxes; legend_style.title is unused here. format_title is
+          # kept so the per-layer titles pass through the same formatting.
           legend_style:
-            title: "Tracks / Events"
             format_title: true
             placement: bottom-right
           static: false
