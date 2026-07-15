@@ -41,7 +41,7 @@ base:
         - {metric: custom, display_name: "Avg Leg Distance (km)", aggregator: mean,
            column: dist_meters, convert_units: true, original_unit: m, new_unit: km}
     density_weighting:
-      sum_column: timespan_seconds
+      density_sum_column: timespan_seconds
     base_map_defs:
       base_maps:
         - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
@@ -83,7 +83,7 @@ coverage-distance:
         - {metric: total_distance, unit: km}
         - {metric: total_duration, unit: h}
     density_weighting:
-      sum_column: dist_meters
+      density_sum_column: dist_meters
     base_map_defs:
       base_maps:
         - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
@@ -130,7 +130,7 @@ grouped:
         - {metric: total_distance, unit: km}
         - {metric: total_duration, unit: h}
     density_weighting:
-      sum_column: timespan_seconds
+      density_sum_column: timespan_seconds
     base_map_defs:
       base_maps:
         - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
@@ -178,7 +178,7 @@ mep_dev:
         - {metric: area_covered_merged, swath_width_meters: 500.0}
         - {metric: area_covered_unmerged, swath_width_meters: 500.0}
     density_weighting:
-      sum_column: timespan_seconds
+      density_sum_column: timespan_seconds
     base_map_defs:
       base_maps:
         - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
@@ -229,7 +229,7 @@ advanced-config:
         - {metric: total_distance, unit: km}
         - {metric: area_covered_merged, swath_width_meters: 500.0}
     density_weighting:
-      sum_column: dist_meters
+      density_sum_column: dist_meters
     density_grid_options:              # the Advanced Configurations accordion
       opacity: 0.5
       auto_scale_or_custom_cell_size:
@@ -282,7 +282,7 @@ custom-metrics:
         - {metric: custom, display_name: "Total Distance (m)", aggregator: sum,
            column: dist_meters, decimal_places: 1}
     density_weighting:
-      sum_column: timespan_seconds
+      density_sum_column: timespan_seconds
     base_map_defs:
       base_maps:
         - url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"

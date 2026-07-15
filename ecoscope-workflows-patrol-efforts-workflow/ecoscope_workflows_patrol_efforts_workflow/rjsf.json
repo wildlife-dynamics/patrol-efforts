@@ -436,7 +436,7 @@
         "density_weighting": {
           "additionalProperties": false,
           "properties": {
-            "sum_column": {
+            "density_sum_column": {
               "default": "timespan_seconds",
               "title": "Calculate Patrol Effort per Cell",
               "type": "string",

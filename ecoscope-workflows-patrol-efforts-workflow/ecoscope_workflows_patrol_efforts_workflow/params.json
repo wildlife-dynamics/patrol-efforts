@@ -373,9 +373,9 @@
     "density_weighting": {
       "additionalProperties": false,
       "properties": {
-        "sum_column": {
+        "density_sum_column": {
           "default": "timespan_seconds",
-          "title": "Sum Column",
+          "title": "Density Sum Column",
           "type": "string",
           "description": "Weight each grid cell by total patrol time or distance travelled.",
           "oneOf": [

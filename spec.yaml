@@ -133,10 +133,10 @@ rjsf-overrides:
 
     # --- Patrol & Event Density Map: effort weighting (time vs distance) ---
     "Patrol & Event Density Map.properties.density_weighting.title": ""
-    "Patrol & Event Density Map.properties.density_weighting.properties.sum_column.title": "Calculate Patrol Effort per Cell"
-    "Patrol & Event Density Map.properties.density_weighting.properties.sum_column.description": "Weight each grid cell by total patrol time (hours) or distance traveled (km)."
-    "Patrol & Event Density Map.properties.density_weighting.properties.sum_column.default": "timespan_seconds"
-    # Time/Distance option labels come from the task schema (_labeled_weighting).
+    "Patrol & Event Density Map.properties.density_weighting.properties.density_sum_column.title": "Calculate Patrol Effort per Cell"
+    "Patrol & Event Density Map.properties.density_weighting.properties.density_sum_column.description": "Weight each grid cell by total patrol time (hours) or distance traveled (km)."
+    "Patrol & Event Density Map.properties.density_weighting.properties.density_sum_column.default": "timespan_seconds"
+    # Time/Distance option labels come from the task schema (labeled_weighting).
     "Patrol & Event Density Map.properties.density_grid_options.title": ""
 
     # --- Filter Data: combined filter card (applies to tracks + events) ---
@@ -358,8 +358,16 @@ workflow:
     tasks:
       - name: Coverage Weighting
         id: density_weighting
-        task: set_density_weighting
-        # sum_column is NOT in partial -> user-facing (Calculate Patrol Effort per Cell).
+        task: set_patrol_weighting_spec
+        # density_sum_column is NOT in partial -> user-facing (Calculate Patrol Effort per Cell).
+
+      - name: Coverage Weighting Column
+        id: weighting_column
+        task: get_weighting_column
+        # fully bound -> nothing user-facing; bridges the WeightingSpec to
+        # calculate_feature_density's sum_column.
+        partial:
+          weighting_spec: ${{ workflow.density_weighting.return }}
 
       - name: Density Grid Options
         id: density_grid_options
@@ -843,7 +851,7 @@ workflow:
         partial:
           meshgrid: ${{ workflow.coverage_meshgrid.return }}
           geometry_type: line
-          sum_column: ${{ workflow.density_weighting.return }}
+          sum_column: ${{ workflow.weighting_column.return }}
         mapvalues:
           argnames: geodataframe
           argvalues: ${{ workflow.split_traj_groups.return }}
@@ -852,7 +860,7 @@ workflow:
         id: coverage_normalized
         task: normalize_density_units
         partial:
-          sum_column: ${{ workflow.density_weighting.return }}
+          weighting_spec: ${{ workflow.density_weighting.return }}
         mapvalues:
           argnames: df
           argvalues: ${{ workflow.grouped_coverage_density.return }}
@@ -861,9 +869,7 @@ workflow:
         id: coverage_legend_title
         task: get_density_legend_title
         partial:
-          sum_column: ${{ workflow.density_weighting.return }}
-          # bound so the prefix stays off the form
-          title_prefix: Patrol Effort
+          weighting_spec: ${{ workflow.density_weighting.return }}
 
       - name: Sort Coverage Values
         id: coverage_sorted

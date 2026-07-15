@@ -9,13 +9,16 @@ from ecoscope.platform.tasks.analysis import (
     get_density_legend_title as get_density_legend_title,
 )
 from ecoscope.platform.tasks.analysis import (
+    get_weighting_column as get_weighting_column,
+)
+from ecoscope.platform.tasks.analysis import (
     normalize_density_units as normalize_density_units,
 )
 from ecoscope.platform.tasks.analysis import (
-    set_density_weighting as set_density_weighting,
+    set_patrol_summary_metrics as set_patrol_summary_metrics,
 )
 from ecoscope.platform.tasks.analysis import (
-    set_patrol_summary_metrics as set_patrol_summary_metrics,
+    set_patrol_weighting_spec as set_patrol_weighting_spec,
 )
 from ecoscope.platform.tasks.analysis import summarize_df as summarize_df
 from ecoscope.platform.tasks.config import (
@@ -447,7 +450,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
     )
 
     density_weighting = (
-        task(set_density_weighting)
+        task(set_patrol_weighting_spec)
         .validate()
         .set_task_instance_id("density_weighting")
         .handle_errors()
@@ -460,6 +463,25 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(**(params.get("density_weighting") or {}))
+        .call()
+    )
+
+    weighting_column = (
+        task(get_weighting_column)
+        .validate()
+        .set_task_instance_id("weighting_column")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            weighting_spec=density_weighting, **(params.get("weighting_column") or {})
+        )
         .call()
     )
 
@@ -1364,7 +1386,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .partial(
             meshgrid=coverage_meshgrid,
             geometry_type="line",
-            sum_column=density_weighting,
+            sum_column=weighting_column,
             **(params.get("grouped_coverage_density") or {}),
         )
         .mapvalues(argnames=["geodataframe"], argvalues=split_traj_groups)
@@ -1384,7 +1406,8 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            sum_column=density_weighting, **(params.get("coverage_normalized") or {})
+            weighting_spec=density_weighting,
+            **(params.get("coverage_normalized") or {}),
         )
         .mapvalues(argnames=["df"], argvalues=grouped_coverage_density)
     )
@@ -1403,8 +1426,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            sum_column=density_weighting,
-            title_prefix="Patrol Effort",
+            weighting_spec=density_weighting,
             **(params.get("coverage_legend_title") or {}),
         )
         .call()

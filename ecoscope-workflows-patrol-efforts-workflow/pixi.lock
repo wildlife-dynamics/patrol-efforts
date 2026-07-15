@@ -52,7 +52,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-bin-1.2.0-hb03c661_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/brotli-python-1.2.0-py312hdb49522_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/bzip2-1.0.8-hda65f42_9.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/c-ares-1.34.6-hb03c661_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/c-ares-1.34.7-hb03c661_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.6.17-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached-property-1.5.2-hd8ed1ab_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached_property-1.5.2-pyha770c72_2.conda
@@ -348,7 +348,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4d/4f/3f2a3f503a2163fab32c055c597d7823782e47bec4c52be4e89c6d27c039/docxtpl-0.19.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/52/2b/55c34d2863a76ca824ef8274691e84240b4ff1acde3d231709e82557c240/duckdb-1.5.4-cp312-cp312-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/a7/39/ce46ee84779ef19d88fd028fc786a6dcc68b73ace33c31997aeda0dfecdc/earthengine_api-1.7.12-py3-none-any.whl
-      - pypi: git+https://github.com/wildlife-dynamics/ecoscope-earthranger-io-core.git#f9532d0882c510993ce54180a74dbcce6249fc2a
+      - pypi: git+https://github.com/wildlife-dynamics/ecoscope-earthranger-io-core.git#aeee92b76c14ad66f52344cb74b00ca63ca5eab5
       - pypi: git+https://github.com/PADAS/er-client#4d61b450d471c7161c64d2f48dfa735a52a6bcf9
       - pypi: https://files.pythonhosted.org/packages/e4/72/42e900510195b23a56bde950d26a51f8b723846bfcaa0286e90287f0422b/fastapi-0.135.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/2a/c8/71f5632a1912551e0f1a04280c7a14fa6378f01b3fe849d78bb3817226a2/geoarrow_c-0.3.1-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl
@@ -454,7 +454,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/brotli-bin-1.2.0-he30d5cf_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/brotli-python-1.2.0-py312hac7b6a9_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/bzip2-1.0.8-h4777abc_9.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/c-ares-1.34.6-he30d5cf_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/c-ares-1.34.7-he30d5cf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.6.17-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached-property-1.5.2-hd8ed1ab_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached_property-1.5.2-pyha770c72_2.conda
@@ -750,7 +750,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4d/4f/3f2a3f503a2163fab32c055c597d7823782e47bec4c52be4e89c6d27c039/docxtpl-0.19.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/cc/59/2d082af578f689231798245b54562c61416e49049b0bda81a06c56a4b53e/duckdb-1.5.4-cp312-cp312-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl
       - pypi: https://files.pythonhosted.org/packages/a7/39/ce46ee84779ef19d88fd028fc786a6dcc68b73ace33c31997aeda0dfecdc/earthengine_api-1.7.12-py3-none-any.whl
-      - pypi: git+https://github.com/wildlife-dynamics/ecoscope-earthranger-io-core.git#f9532d0882c510993ce54180a74dbcce6249fc2a
+      - pypi: git+https://github.com/wildlife-dynamics/ecoscope-earthranger-io-core.git#aeee92b76c14ad66f52344cb74b00ca63ca5eab5
       - pypi: git+https://github.com/PADAS/er-client#4d61b450d471c7161c64d2f48dfa735a52a6bcf9
       - pypi: https://files.pythonhosted.org/packages/e4/72/42e900510195b23a56bde950d26a51f8b723846bfcaa0286e90287f0422b/fastapi-0.135.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/74/05/c28749e651921e469d22c06c694b3e42dac5605228ac1c34add3371bb4ba/geoarrow_c-0.3.1-cp312-cp312-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl
@@ -857,7 +857,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-bin-1.2.0-h8616949_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/brotli-python-1.2.0-py312h4b46afd_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/bzip2-1.0.8-h500dc9f_9.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-64/c-ares-1.34.6-hb5e19a0_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/c-ares-1.34.7-ha1e9b39_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.6.17-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached-property-1.5.2-hd8ed1ab_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached_property-1.5.2-pyha770c72_2.conda
@@ -1143,7 +1143,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4d/4f/3f2a3f503a2163fab32c055c597d7823782e47bec4c52be4e89c6d27c039/docxtpl-0.19.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/2e/2b/b698d82a5e1e30b6a05748d72045f672994c6b22f4f0f8423523608b991f/duckdb-1.5.4-cp312-cp312-macosx_10_13_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/a7/39/ce46ee84779ef19d88fd028fc786a6dcc68b73ace33c31997aeda0dfecdc/earthengine_api-1.7.12-py3-none-any.whl
-      - pypi: git+https://github.com/wildlife-dynamics/ecoscope-earthranger-io-core.git#f9532d0882c510993ce54180a74dbcce6249fc2a
+      - pypi: git+https://github.com/wildlife-dynamics/ecoscope-earthranger-io-core.git#aeee92b76c14ad66f52344cb74b00ca63ca5eab5
       - pypi: git+https://github.com/PADAS/er-client#4d61b450d471c7161c64d2f48dfa735a52a6bcf9
       - pypi: https://files.pythonhosted.org/packages/e4/72/42e900510195b23a56bde950d26a51f8b723846bfcaa0286e90287f0422b/fastapi-0.135.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/01/3c/5b2ada5b6166495ad1fd1f93127a6ad313833a25c38f98bab0c9b4acc95d/geoarrow_c-0.3.1-cp312-cp312-macosx_10_13_x86_64.whl
@@ -1250,7 +1250,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/brotli-bin-1.2.0-hc919400_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/brotli-python-1.2.0-py312h0dfefe5_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/bzip2-1.0.8-hd037594_9.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/c-ares-1.34.6-hc919400_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/c-ares-1.34.7-h84a0fba_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.6.17-hbd8a1cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached-property-1.5.2-hd8ed1ab_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached_property-1.5.2-pyha770c72_2.conda
@@ -1536,7 +1536,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4d/4f/3f2a3f503a2163fab32c055c597d7823782e47bec4c52be4e89c6d27c039/docxtpl-0.19.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/71/75/37e13f39268eaf34864453b3a039c4a1ff0b088d3eae45a4289b41c98c1b/duckdb-1.5.4-cp312-cp312-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/a7/39/ce46ee84779ef19d88fd028fc786a6dcc68b73ace33c31997aeda0dfecdc/earthengine_api-1.7.12-py3-none-any.whl
-      - pypi: git+https://github.com/wildlife-dynamics/ecoscope-earthranger-io-core.git#f9532d0882c510993ce54180a74dbcce6249fc2a
+      - pypi: git+https://github.com/wildlife-dynamics/ecoscope-earthranger-io-core.git#aeee92b76c14ad66f52344cb74b00ca63ca5eab5
       - pypi: git+https://github.com/PADAS/er-client#4d61b450d471c7161c64d2f48dfa735a52a6bcf9
       - pypi: https://files.pythonhosted.org/packages/e4/72/42e900510195b23a56bde950d26a51f8b723846bfcaa0286e90287f0422b/fastapi-0.135.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/66/ec/ffd43f0671a5c7d46776afe4a3d15d21a04206339df3054ef676b3c36fbf/geoarrow_c-0.3.1-cp312-cp312-macosx_11_0_arm64.whl
@@ -1642,7 +1642,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/brotli-bin-1.2.0-hfd05255_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/brotli-python-1.2.0-py312hc6d9e41_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/bzip2-1.0.8-h0ad9c76_9.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/c-ares-1.34.6-hfd05255_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/c-ares-1.34.7-hfd05255_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.6.17-h4c7d964_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached-property-1.5.2-hd8ed1ab_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cached_property-1.5.2-pyha770c72_2.conda
@@ -1927,7 +1927,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4d/4f/3f2a3f503a2163fab32c055c597d7823782e47bec4c52be4e89c6d27c039/docxtpl-0.19.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/cf/30/ade5952b8182fac86fab43b95ebe3836e66381d0ad64eb1e54bd8207c988/duckdb-1.5.4-cp312-cp312-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/a7/39/ce46ee84779ef19d88fd028fc786a6dcc68b73ace33c31997aeda0dfecdc/earthengine_api-1.7.12-py3-none-any.whl
-      - pypi: git+https://github.com/wildlife-dynamics/ecoscope-earthranger-io-core.git#f9532d0882c510993ce54180a74dbcce6249fc2a
+      - pypi: git+https://github.com/wildlife-dynamics/ecoscope-earthranger-io-core.git#aeee92b76c14ad66f52344cb74b00ca63ca5eab5
       - pypi: git+https://github.com/PADAS/er-client#4d61b450d471c7161c64d2f48dfa735a52a6bcf9
       - pypi: https://files.pythonhosted.org/packages/e4/72/42e900510195b23a56bde950d26a51f8b723846bfcaa0286e90287f0422b/fastapi-0.135.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/36/1f/63d7d5491f1dc81e6c793276b898b983824faa6167616ed4130477d4629e/geoarrow_c-0.3.1-cp312-cp312-win_amd64.whl
@@ -2070,7 +2070,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/readline-8.3-h853b02a_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/referencing-0.37.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/rich-15.0.0-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.1-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.3-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/rpds-py-2026.6.3-py313hafbe609_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/ruamel.yaml-0.18.17-py313h54dd161_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/ruamel.yaml.clib-0.2.15-py313h54dd161_1.conda
@@ -2168,7 +2168,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/readline-8.3-hb682ff5_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/referencing-0.37.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/rich-15.0.0-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.1-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.3-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/rpds-py-2026.6.3-py313hc72d3b0_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/ruamel.yaml-0.18.17-py313h62ef0ea_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/ruamel.yaml.clib-0.2.15-py313h62ef0ea_1.conda
@@ -2260,7 +2260,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/readline-8.3-h68b038d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/referencing-0.37.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/rich-15.0.0-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.1-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.3-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/rpds-py-2026.6.3-py313he4ad68c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/ruamel.yaml-0.18.17-py313h16366db_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/ruamel.yaml.clib-0.2.15-py313h16366db_1.conda
@@ -2351,7 +2351,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/readline-8.3-h46df422_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/referencing-0.37.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/rich-15.0.0-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.1-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.3-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/rpds-py-2026.6.3-py313hb9d2816_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ruamel.yaml-0.18.17-py313h6688731_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ruamel.yaml.clib-0.2.15-py313h6688731_1.conda
@@ -2439,7 +2439,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/pyyaml-6.0.3-py313hd650c13_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/referencing-0.37.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/rich-15.0.0-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.1-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.3-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/rpds-py-2026.6.3-py313ha9ea572_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/ruamel.yaml-0.18.17-py313h5fd188c_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/ruamel.yaml.clib-0.2.15-py313h5fd188c_1.conda
@@ -2603,7 +2603,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/readline-8.3-h853b02a_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/referencing-0.37.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/rich-15.0.0-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.1-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.3-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/rpds-py-2026.6.3-py313hafbe609_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/ruamel.yaml-0.18.17-py313h54dd161_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/ruamel.yaml.clib-0.2.15-py313h54dd161_1.conda
@@ -2766,7 +2766,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/readline-8.3-hb682ff5_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/referencing-0.37.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/rich-15.0.0-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.1-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.3-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/rpds-py-2026.6.3-py313hc72d3b0_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/ruamel.yaml-0.18.17-py313h62ef0ea_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/ruamel.yaml.clib-0.2.15-py313h62ef0ea_1.conda
@@ -2925,7 +2925,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/readline-8.3-h68b038d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/referencing-0.37.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/rich-15.0.0-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.1-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.3-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/rpds-py-2026.6.3-py313he4ad68c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/ruamel.yaml-0.18.17-py313h16366db_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/ruamel.yaml.clib-0.2.15-py313h16366db_1.conda
@@ -3083,7 +3083,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/readline-8.3-h46df422_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/referencing-0.37.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/rich-15.0.0-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.1-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.3-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/rpds-py-2026.6.3-py313hb9d2816_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ruamel.yaml-0.18.17-py313h6688731_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ruamel.yaml.clib-0.2.15-py313h6688731_1.conda
@@ -3242,7 +3242,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/rav1e-0.8.1-h007690e_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/referencing-0.37.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/rich-15.0.0-pyhcf101f3_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.1-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.3-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/rpds-py-2026.6.3-py313ha9ea572_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/ruamel.yaml-0.18.17-py313h5fd188c_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/ruamel.yaml.clib-0.2.15-py313h5fd188c_1.conda
@@ -5925,50 +5925,50 @@ packages:
   purls: []
   size: 56115
   timestamp: 1771350256444
-- conda: https://conda.anaconda.org/conda-forge/linux-64/c-ares-1.34.6-hb03c661_0.conda
-  sha256: cc9accf72fa028d31c2a038460787751127317dcfa991f8d1f1babf216bb454e
-  md5: 920bb03579f15389b9e512095ad995b7
+- conda: https://conda.anaconda.org/conda-forge/linux-64/c-ares-1.34.7-hb03c661_0.conda
+  sha256: 2492fb98e8460765b7c32df1e910029c5a7d7298ab598e6df483e66e113fad2f
+  md5: 9baa084a2da406026ab2ce423c9930c1
   depends:
   - __glibc >=2.17,<3.0.a0
   - libgcc >=14
   license: MIT
   license_family: MIT
   purls: []
-  size: 207882
-  timestamp: 1765214722852
-- conda: https://conda.anaconda.org/conda-forge/linux-aarch64/c-ares-1.34.6-he30d5cf_0.conda
-  sha256: 7ec8a68efe479e2e298558cbc2e79d29430d5c7508254268818c0ae19b206519
-  md5: 1dfbec0d08f112103405756181304c16
+  size: 210197
+  timestamp: 1784056124569
+- conda: https://conda.anaconda.org/conda-forge/linux-aarch64/c-ares-1.34.7-he30d5cf_0.conda
+  sha256: 901d9d7dec92e180ac729fb4d4f0fe0956b70bdf11fdf48c38d6d049cb76b2d9
+  md5: ecca41a47e69eab3ecd6aebab5651379
   depends:
   - libgcc >=14
   license: MIT
   license_family: MIT
   purls: []
-  size: 217215
-  timestamp: 1765214743735
-- conda: https://conda.anaconda.org/conda-forge/osx-64/c-ares-1.34.6-hb5e19a0_0.conda
-  sha256: 2f5bc0292d595399df0d168355b4e9820affc8036792d6984bd751fdda2bcaea
-  md5: fc9a153c57c9f070bebaa7eef30a8f17
-  depends:
-  - __osx >=10.13
-  license: MIT
-  license_family: MIT
-  purls: []
-  size: 186122
-  timestamp: 1765215100384
-- conda: https://conda.anaconda.org/conda-forge/osx-arm64/c-ares-1.34.6-hc919400_0.conda
-  sha256: 2995f2aed4e53725e5efbc28199b46bf311c3cab2648fc4f10c2227d6d5fa196
-  md5: bcb3cba70cf1eec964a03b4ba7775f01
+  size: 220420
+  timestamp: 1784056151876
+- conda: https://conda.anaconda.org/conda-forge/osx-64/c-ares-1.34.7-ha1e9b39_0.conda
+  sha256: 21ba8733b77e423998f9faf0c921e8dfdb904f3d4d159151d3aa1148d4afcd70
+  md5: 307b644d1083f26e82a3e1bbad62a5bc
   depends:
   - __osx >=11.0
   license: MIT
   license_family: MIT
   purls: []
-  size: 180327
-  timestamp: 1765215064054
-- conda: https://conda.anaconda.org/conda-forge/win-64/c-ares-1.34.6-hfd05255_0.conda
-  sha256: 5e1e2e24ce279f77e421fcc0e5846c944a8a75f7cf6158427c7302b02984291a
-  md5: 7c6da34e5b6e60b414592c74582e28bf
+  size: 189446
+  timestamp: 1784056679057
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/c-ares-1.34.7-h84a0fba_0.conda
+  sha256: b48fce2b209ace58b5bed873a58baf6ccb48d1119172dd7aef7a9b23890f43ae
+  md5: 3c93a6af81f29a03b42f1bd6deaf8c74
+  depends:
+  - __osx >=11.0
+  license: MIT
+  license_family: MIT
+  purls: []
+  size: 182611
+  timestamp: 1784057087713
+- conda: https://conda.anaconda.org/conda-forge/win-64/c-ares-1.34.7-hfd05255_0.conda
+  sha256: 5401df066874ee5d209696a53e2affbda6ab8bb35b1e7b658e2f87ea5d71cd73
+  md5: 8122bfdce3d199aa7abb8ce8bdfe1cc5
   depends:
   - ucrt >=10.0.20348.0
   - vc >=14.3,<15
@@ -5976,8 +5976,8 @@ packages:
   license: MIT
   license_family: MIT
   purls: []
-  size: 193550
-  timestamp: 1765215100218
+  size: 197350
+  timestamp: 1784056315080
 - conda: https://conda.anaconda.org/conda-forge/linux-64/c-blosc2-3.2.1-hc31b594_0.conda
   sha256: 1007d168063071d2ba46a2a98dcffec2e7e0c1506034e3a104b23aad3b4cfcef
   md5: 2013294801e03386eeeb4631e171b267
@@ -6932,8 +6932,8 @@ packages:
   requires_python: '>=3.7'
 - pypi: /Users/yunwu/MEP/wt-tasks/ecoscope
   name: ecoscope
-  version: 2.15.0
-  sha256: a7855fd9c07ebef35fb55ed48bb6145f27046a581f4a052db50f16a0ab844081
+  version: 2.16.3.dev38+g28f288b
+  sha256: 796939ad5ffac71acd6a61f6830f7846e2694cbfe2dff322b7ebe732c152d423
   requires_dist:
   - backoff>=2
   - earthengine-api>=1.4,<1.7.13
@@ -6941,6 +6941,7 @@ packages:
   - geopandas>=1
   - numpy>=2,<3
   - pandas<3
+  - pyarrow>=20
   - pyproj>=3.3
   - rasterio>=1.3
   - tqdm>=4
@@ -6959,7 +6960,6 @@ packages:
   - lonboard @ git+https://github.com/wildlife-dynamics/lonboard@v0.0.8 ; extra == 'mapping'
   - matplotlib ; extra == 'mapping'
   - mapclassify ; extra == 'mapping'
-  - pyarrow ; extra == 'mapping'
   - plotly ; extra == 'plotting'
   - scikit-learn ; extra == 'plotting'
   - pandera>=0.28,<0.29 ; extra == 'platform'
@@ -6968,7 +6968,7 @@ packages:
   - cloudpathlib[gs] ; extra == 'platform'
   - wt-registry>=0.2.0,<0.3.0 ; extra == 'platform'
   - wt-task>=0.1.0,<0.2.0 ; extra == 'platform'
-  - ecoscope-earthranger-io-core @ git+https://github.com/wildlife-dynamics/ecoscope-earthranger-io-core.git@v0.0.16 ; extra == 'platform'
+  - ecoscope-earthranger-io-core @ git+https://github.com/wildlife-dynamics/ecoscope-earthranger-io-core.git@v0.0.20 ; extra == 'platform'
   - fastapi ; extra == 'platform'
   - pyarrow>=20 ; extra == 'platform'
   - geoarrow-pyarrow>=0.2.0,<0.3 ; extra == 'platform'
@@ -6980,9 +6980,9 @@ packages:
   - pydata-sphinx-theme<0.17.0 ; extra == 'docs'
   - sphinx ; extra == 'docs'
   - sphinx-autoapi ; extra == 'docs'
-- pypi: git+https://github.com/wildlife-dynamics/ecoscope-earthranger-io-core.git#f9532d0882c510993ce54180a74dbcce6249fc2a
+- pypi: git+https://github.com/wildlife-dynamics/ecoscope-earthranger-io-core.git#aeee92b76c14ad66f52344cb74b00ca63ca5eab5
   name: ecoscope-earthranger-io-core
-  version: 0.0.16
+  version: 0.0.20
   requires_dist:
   - geoarrow-pyarrow>=0.2.0,<0.3
   - google-auth>=2.0.0,<3
@@ -20260,9 +20260,9 @@ packages:
   license_family: MIT
   size: 208577
   timestamp: 1775991661559
-- conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.1-pyhcf101f3_0.conda
-  sha256: e29d6b7138aca5e0773462c07bbafd707f8fe9763f95d811ccd4394ac0f262ff
-  md5: e7cc7bf579daf5fa80338c1efe41b62b
+- conda: https://conda.anaconda.org/conda-forge/noarch/rich-toolkit-0.20.3-pyhcf101f3_0.conda
+  sha256: 104fbf62487954552edb19ee8706a0d2c9383ff1e1e16ab31c6947d20d34a862
+  md5: 3296ee717391681ab734f0a01c89ac85
   depends:
   - python >=3.10
   - rich >=13.7.1
@@ -20270,9 +20270,8 @@ packages:
   - typing_extensions >=4.12.2
   - python
   license: MIT
-  license_family: MIT
-  size: 34331
-  timestamp: 1780659356824
+  size: 34824
+  timestamp: 1784024058693
 - conda: https://conda.anaconda.org/conda-forge/linux-64/rpds-py-2026.6.3-py312h192e038_0.conda
   sha256: 4a190c74b5f3b441820a3142b03a489987c724b65237882ebe87d75892345d17
   md5: 40984fba15f43a366ea4c6dea2b4c8bd
