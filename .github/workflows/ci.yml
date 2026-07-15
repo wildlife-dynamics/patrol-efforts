@@ -46,27 +46,11 @@ jobs:
           echo "cases=$keys" >> $GITHUB_OUTPUT
           echo "first_case=$(yq 'keys | .[0]' test-cases.yaml)" >> $GITHUB_OUTPUT
 
-  test:
-    needs: parse-test-cases
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        case: ${{ fromJSON(needs.parse-test-cases.outputs.cases) }}
-
-    steps:
-      - uses: actions/checkout@v6
-      - name: Install pixi
-        run: curl -fsSL https://pixi.sh/install.sh | bash && echo "$HOME/.pixi/bin" >> $GITHUB_PATH
-      - name: Set CI variables
-        run: |
-          echo "RELEASE_DIR=${{ needs.parse-test-cases.outputs.release_dir }}" >> $GITHUB_ENV
-      - name: Test
-        run: >-
-          pixi run --manifest-path $RELEASE_DIR/pixi.toml
-          --locked -e test
-          test-app-sequential-mock-io
-          --case ${{ matrix.case }}
+  # NOTE: the scaffold's per-case syrupy snapshot `test` job was removed —
+  # no `__results_snapshots__` were ever committed (it failed on main since
+  # the original ranger scaffold) and PNG snapshots are platform-fragile.
+  # Per-case coverage runs in test.yml (Test Workflows with Published
+  # Packages) via dev/run-test-cases.sh on all three OSes.
 
   docker:
     needs: parse-test-cases

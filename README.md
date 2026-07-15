@@ -9,7 +9,7 @@ This workflow helps you to measure and compare **patrol effort** across your ran
 - Builds a configurable **summary table** of patrol effort per category (per ranger, per patrol type, or per patrol status) with metrics such as patrol count, patrol days, distance, duration, and area covered
 - Creates an interactive **Patrols & Events Map** of patrol tracks overlaid with reported event locations, colour-coded by category
 - Creates a **Patrol Coverage Map** showing how much patrol effort (time or distance) fell on each area of the landscape
-- Creates an **Event Density Map** showing where reported events concentrate
+- Creates an **Event Sum Map** showing where reported events concentrate
 - Optionally splits every output into per-group dashboard views (by ranger, patrol type, patrol serial number, or a time period such as month)
 
 **Who should use this:**
@@ -163,7 +163,7 @@ These optional settings are hidden by default in Ecoscope Desktop and can be rev
   - **Minimum / Maximum Segment Speed (Kilometers per Hour)**: Defaults `0.01` / `500`
 
 #### Patrol & Event Density Map — Advanced Configurations
-One set of grid options applies to **both** the Patrol Coverage Map and the Event Density Map.
+One set of grid options applies to **both** the Patrol Coverage Map and the Event Sum Map.
 
 - **Heatmap Layer Opacity**: Transparency of the density layers, from `1` (fully visible) to `0` (hidden)
   - Default: `0.7`
@@ -224,7 +224,7 @@ After the workflow completes successfully, you'll see an interactive dashboard w
   - Weighted by **time** (legend: `Patrol Effort (hours)`) or **distance** (legend: `Patrol Effort (km)`) per your **Calculate Patrol Effort per Cell** choice
   - Darker/warmer cells indicate more patrol effort — use it to spot well-covered areas and gaps
 
-#### Event Density Map
+#### Event Sum Map
 - **Format**: Interactive gridded heatmap
 - **Features**:
   - Each grid cell is shaded by the **number of events** recorded inside it
@@ -345,11 +345,11 @@ Here are some typical scenarios and how to configure the workflow for each:
 - Remove entries from **Filter Exact Point Coordinates** if you've over-filtered
 - If you set **Colour Events By** to `Event Category`, make sure your events actually carry an event category — otherwise colour events by `Event Type`
 
-#### Coverage or Event Density Map is empty
+#### Coverage or Event Sum Map is empty
 **Problem**: A density map shows no shaded cells.
 
 **Solutions**:
-- The Event Density Map only appears when events were returned — widen the time range or clear the **Event Types** filter
+- The Event Sum Map only appears when events were returned — widen the time range or clear the **Event Types** filter
 - Confirm the selected patrols produced trajectory segments (a coverage map needs GPS tracks)
 - If you set a **Custom Grid Cell Size**, make sure it is appropriate for your **Coordinate Reference System** — an overly large cell can collapse the grid to a single cell
 
