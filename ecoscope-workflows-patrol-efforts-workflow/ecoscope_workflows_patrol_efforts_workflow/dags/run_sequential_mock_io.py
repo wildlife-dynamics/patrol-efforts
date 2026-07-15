@@ -1188,7 +1188,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             legend={
                 "label_column": set_traj_color_column,
                 "color_column": "patrol_traj_colormap",
-                "title": "Tracks",
+                "title": "Patrols",
             },
             tooltip_columns=["patrol_subject", "Start", "Speed (kph)"],
             **(params.get("traj_polyline_layer") or {}),

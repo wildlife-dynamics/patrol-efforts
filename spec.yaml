@@ -714,7 +714,7 @@ workflow:
           legend:
             label_column: ${{ workflow.set_traj_color_column.return }}
             color_column: patrol_traj_colormap
-            title: "Tracks"
+            title: "Patrols"
           tooltip_columns: ["patrol_subject", "Start", "Speed (kph)"]
         mapvalues:
           argnames: geodataframe
