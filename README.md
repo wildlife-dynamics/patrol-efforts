@@ -214,7 +214,7 @@ After the workflow completes successfully, you'll see an interactive dashboard w
 - **Features**:
   - Coloured polylines show each patrol track, coloured by your **Colour Tracks By** choice
   - Coloured points show each reported event, coloured by your **Colour Events By** choice
-  - Legend maps colours to categories; north arrow in the corner
+  - Two titled legend boxes — **Patrols** (track categories) and **Events** (event categories) — map colours to categories; north arrow in the corner
   - Pan, zoom, and toggle base layers using the map controls
 
 #### Patrol Coverage Map

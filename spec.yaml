@@ -1,71 +1,21 @@
 id: patrol_efforts
 
 requirements:
-  # DEV MODE — developing the summarize_df coverage aggregator
-  # against the editable local ecoscope checkout
-  # (branch feat/patrol-coverage-tasks). ext-custom must ALSO be editable here:
-  # the published ext-custom conda recipe hard-depends on conda ecoscope-platform
-  # (>=2.11.6), which pins pandera 0.24 and conflicts with the editable ecoscope
-  # (pandera 0.28). ext-custom's pypi [project].dependencies omit ecoscope-platform,
-  # so the editable install drops the conda platform and the conflict with it.
-  # Restore the pinned conda reqs below (bumped to the release that carries these
-  # tasks) before publish; CI rejects path/editable requirements.
-  # python pin keeps the ephemeral env off 3.14+ (missing transitive wheels).
-  - name: python
-    version: "3.12.*"
-  # Channel-bearing conda req so the discovery/runtime solve registers the
-  # repo.prefix.dev alias and can resolve the auto-injected wt-task / wt-runner.
-  - name: wt-task
-    version: ">=0.1.3,<1.0.0"
+  # ecoscope-platform 2.16.3 is the release that carries the patrol coverage /
+  # summary-metric / density-weighting tasks (wildlife-dynamics/ecoscope#749).
+  - name: ecoscope-platform
+    version: ">=2.16.3, <2.17.0"
     channel: https://repo.prefix.dev/ecoscope-workflows/
-  # Geospatial / scientific native stack provided by conda (mirrors the
-  # ecoscope-dev workspace) so the editable ecoscope's heavy deps (pyproj,
-  # shapely, gdal, proj, geos via geopandas/rasterio) are prebuilt binaries
-  # rather than source-built by uv.
-  - name: numpy
-    version: ">=2,<2.1"
-    channel: conda-forge
-  - name: pyarrow
-    version: ">=20,<24"
-    channel: conda-forge
-  - name: pandas
-    version: "<3"
-    channel: conda-forge
-  - name: geopandas
-    version: "*"
-    channel: conda-forge
-  - name: rasterio
-    version: "*"
-    channel: conda-forge
-  - name: pydeck
-    version: "==0.0.2"
-    channel: https://repo.prefix.dev/ecoscope-workflows-custom/
-  # ext-custom pins setuptools<=81; conda otherwise resolves 82.x.
-  - name: setuptools
-    version: "<81"
-    channel: conda-forge
-  # pydantic <2.9 required by editable ecoscope (>=2.9 breaks discriminated
-  # unions in apply_classification). Declared here so the emitted pixi.toml
-  # carries the pin through --install/--update solves (was a hand-patch).
-  - name: pydantic
-    version: ">=2.0.0,<2.9.0"
-    channel: conda-forge
-  - name: ecoscope
-    path: /Users/yunwu/MEP/wt-tasks/ecoscope
-    editable: true
-    # plotting: ext-custom's draw_boxplot (ported on wt-release-candidate)
-    # eagerly imports plotly at package load; it lives in ecoscope's plotting
-    # extra. In a published install it arrives transitively via ecoscope-platform.
-    extras: ["platform", "mapping", "analysis", "plotting"]
   - name: ecoscope-workflows-ext-custom
-    path: /Users/yunwu/MEP/wt-tasks/ecoscope-workflow-task-library/src/ecoscope-workflows-ext-custom
-    editable: true
-  # - name: ecoscope-platform
-  #   version: ">=2.11.14, <2.12.0"
-  #   channel: https://repo.prefix.dev/ecoscope-workflows/
-  # - name: ecoscope-workflows-ext-custom
-  #   version: 0.1.0rc6
-  #   channel: https://repo.prefix.dev/ecoscope-workflows-custom/
+    version: 0.1.0rc18
+    channel: https://repo.prefix.dev/ecoscope-workflows-custom/
+  # ecoscope-platform/ext-custom require pydeck ==0.9.2, but the custom channel
+  # hosts a stub pydeck 0.0.x that shadows conda-forge under strict channel
+  # priority. Route pydeck to conda-forge explicitly (same pattern as
+  # encounter-rate and wt-download-patrols).
+  - name: pydeck
+    version: "0.9.2"
+    channel: conda-forge
 
 rjsf-overrides:
   properties:
