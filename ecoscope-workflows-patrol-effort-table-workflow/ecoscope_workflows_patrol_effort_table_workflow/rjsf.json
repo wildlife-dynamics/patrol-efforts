@@ -68,12 +68,12 @@
       "description": "Choose the period of time to analyze.",
       "title": "Time Range"
     },
-    "Patrol and Event Types": {
+    "Patrol Types": {
       "type": "object",
       "description": " ",
       "ecoscope:task_group": true,
       "properties": {
-        "er_patrol_and_events_params": {
+        "er_patrol_params": {
           "additionalProperties": false,
           "properties": {
             "patrol_types": {
@@ -88,23 +88,6 @@
                   "transformer": "EarthRangerEnumResolver",
                   "transformer_kws": {
                     "type": "patrol_type",
-                    "depends_on": "properties.er_client_name.properties.data_source.properties.name"
-                  }
-                }
-              ]
-            },
-            "event_types": {
-              "items": {
-                "type": "string"
-              },
-              "title": "Event Types",
-              "type": "array",
-              "description": "Specify the event type(s) to analyze (optional). Leave this section empty to analyze all event types.",
-              "ecoscope:transform": [
-                {
-                  "transformer": "EarthRangerEnumResolver",
-                  "transformer_kws": {
-                    "type": "event_type",
                     "depends_on": "properties.er_client_name.properties.data_source.properties.name"
                   }
                 }
@@ -138,362 +121,9 @@
             }
           },
           "required": [
-            "patrol_types",
-            "event_types"
+            "patrol_types"
           ],
           "type": "object",
-          "title": ""
-        }
-      }
-    },
-    "Group Data": {
-      "type": "object",
-      "description": "Configure how patrols and events are grouped (by category or temporal index) and split into per-group dashboard views.",
-      "ecoscope:task_group": true,
-      "properties": {
-        "groupers": {
-          "additionalProperties": false,
-          "properties": {
-            "groupers": {
-              "default": null,
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/ValueGrouper"
-                  },
-                  {
-                    "$ref": "#/$defs/TemporalGrouper"
-                  }
-                ],
-                "title": "Group by"
-              },
-              "title": " ",
-              "type": "array",
-              "description": ""
-            }
-          },
-          "type": "object",
-          "required": [],
-          "title": ""
-        }
-      }
-    },
-    "Patrols & Events Map": {
-      "type": "object",
-      "description": "Colour the Patrols & Events map layers.",
-      "ecoscope:task_group": true,
-      "properties": {
-        "set_traj_color_column": {
-          "additionalProperties": false,
-          "properties": {
-            "var": {
-              "title": "Colour Tracks By",
-              "type": "string",
-              "default": "patrol_subject",
-              "oneOf": [
-                {
-                  "const": "patrol_subject",
-                  "title": "Patrol Subject"
-                },
-                {
-                  "const": "patrol_type__value",
-                  "title": "Patrol Type"
-                },
-                {
-                  "const": "patrol_status",
-                  "title": "Patrol Status"
-                }
-              ]
-            }
-          },
-          "required": [
-            "var"
-          ],
-          "type": "object",
-          "title": "Track Colour Category"
-        },
-        "set_event_color_column": {
-          "additionalProperties": false,
-          "properties": {
-            "var": {
-              "title": "Colour Events By",
-              "type": "string",
-              "default": "event_type",
-              "oneOf": [
-                {
-                  "const": "event_type",
-                  "title": "Event Type"
-                },
-                {
-                  "const": "event_category",
-                  "title": "Event Category"
-                }
-              ]
-            }
-          },
-          "required": [
-            "var"
-          ],
-          "type": "object",
-          "title": "Event Colour Category"
-        }
-      }
-    },
-    "base_map_defs": {
-      "additionalProperties": false,
-      "properties": {
-        "base_maps": {
-          "default": [
-            {
-              "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
-              "opacity": 1.0
-            },
-            {
-              "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-              "opacity": 0.5
-            }
-          ],
-          "items": {
-            "title": "Base Layer",
-            "anyOf": [
-              {
-                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
-                "properties": {
-                  "url": {
-                    "default": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                    "title": "Preset Layer URL",
-                    "type": "string",
-                    "const": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                    "enum": [
-                      "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    ]
-                  },
-                  "opacity": {
-                    "default": 1,
-                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
-                    "ecoscope:advanced": true,
-                    "maximum": 1.0,
-                    "minimum": 0.0,
-                    "title": "Layer Opacity",
-                    "type": "number"
-                  }
-                },
-                "title": "Open Street Map",
-                "type": "object"
-              },
-              {
-                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
-                "properties": {
-                  "url": {
-                    "default": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
-                    "title": "Preset Layer URL",
-                    "type": "string",
-                    "const": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
-                    "enum": [
-                      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
-                    ]
-                  },
-                  "opacity": {
-                    "default": 1,
-                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
-                    "ecoscope:advanced": true,
-                    "maximum": 1.0,
-                    "minimum": 0.0,
-                    "title": "Layer Opacity",
-                    "type": "number"
-                  }
-                },
-                "title": "Roadmap",
-                "type": "object"
-              },
-              {
-                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
-                "properties": {
-                  "url": {
-                    "default": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-                    "title": "Preset Layer URL",
-                    "type": "string",
-                    "const": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-                    "enum": [
-                      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                    ]
-                  },
-                  "opacity": {
-                    "default": 1,
-                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
-                    "ecoscope:advanced": true,
-                    "maximum": 1.0,
-                    "minimum": 0.0,
-                    "title": "Layer Opacity",
-                    "type": "number"
-                  }
-                },
-                "title": "Satellite",
-                "type": "object"
-              },
-              {
-                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
-                "properties": {
-                  "url": {
-                    "default": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
-                    "title": "Preset Layer URL",
-                    "type": "string",
-                    "const": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
-                    "enum": [
-                      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
-                    ]
-                  },
-                  "opacity": {
-                    "default": 1,
-                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
-                    "ecoscope:advanced": true,
-                    "maximum": 1.0,
-                    "minimum": 0.0,
-                    "title": "Layer Opacity",
-                    "type": "number"
-                  }
-                },
-                "title": "Terrain",
-                "type": "object"
-              },
-              {
-                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
-                "properties": {
-                  "url": {
-                    "default": "https://server.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}",
-                    "title": "Preset Layer URL",
-                    "type": "string",
-                    "const": "https://server.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}",
-                    "enum": [
-                      "https://server.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}"
-                    ]
-                  },
-                  "opacity": {
-                    "default": 1,
-                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
-                    "ecoscope:advanced": true,
-                    "maximum": 1.0,
-                    "minimum": 0.0,
-                    "title": "Layer Opacity",
-                    "type": "number"
-                  }
-                },
-                "title": "USGS Hillshade",
-                "type": "object"
-              },
-              {
-                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
-                "properties": {
-                  "url": {
-                    "default": "https://example.tiles.com/{z}/{x}/{y}.png",
-                    "description": "The URL of a publicly accessible tiled raster service.",
-                    "pattern": "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}([-a-zA-Z0-9()@:%_\\+.~#?&//=\\{\\}]*)",
-                    "title": "Custom Layer URL",
-                    "type": "string"
-                  },
-                  "opacity": {
-                    "default": 1,
-                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
-                    "ecoscope:advanced": true,
-                    "maximum": 1.0,
-                    "minimum": 0.0,
-                    "title": "Custom Layer Opacity",
-                    "type": "number"
-                  },
-                  "max_zoom": {
-                    "default": 20,
-                    "description": "Set the maximum zoom level to fetch tiles for.",
-                    "title": "Custom Layer Max Zoom",
-                    "type": "integer"
-                  },
-                  "min_zoom": {
-                    "default": 0,
-                    "description": "Set the minimum zoom level to fetch tiles for.",
-                    "title": "Custom Layer Min Zoom",
-                    "type": "integer"
-                  }
-                },
-                "title": "Custom Layer (Advanced)",
-                "type": "object"
-              }
-            ]
-          },
-          "title": " ",
-          "type": "array",
-          "description": "Select tile layers to use as base layers in map outputs. The first layer in the list will be the bottommost layer displayed.",
-          "ecoscope:advanced": true
-        }
-      },
-      "type": "object",
-      "required": [],
-      "title": "Map Base Layers"
-    },
-    "Patrol & Event Density Map": {
-      "type": "object",
-      "description": "Grid heatmaps of patrol effort and event counts.",
-      "ecoscope:task_group": true,
-      "properties": {
-        "density_weighting": {
-          "additionalProperties": false,
-          "properties": {
-            "density_sum_column": {
-              "default": "timespan_seconds",
-              "title": "Calculate Patrol Effort per Cell",
-              "type": "string",
-              "description": "Weight each grid cell by total patrol time (hours) or distance traveled (km).",
-              "oneOf": [
-                {
-                  "const": "timespan_seconds",
-                  "title": "Time"
-                },
-                {
-                  "const": "dist_meters",
-                  "title": "Distance"
-                }
-              ]
-            }
-          },
-          "type": "object",
-          "required": [],
-          "title": ""
-        },
-        "density_grid_options": {
-          "additionalProperties": false,
-          "properties": {
-            "opacity": {
-              "default": 0.7,
-              "maximum": 1.0,
-              "minimum": 0.0,
-              "title": "Heatmap Layer Opacity",
-              "type": "number",
-              "description": "Set heatmap layer transparency from 1 (fully visible) to 0 (hidden).",
-              "ecoscope:advanced": true
-            },
-            "auto_scale_or_custom_cell_size": {
-              "anyOf": [
-                {
-                  "$ref": "#/$defs/AutoScaleGridCellSize"
-                },
-                {
-                  "$ref": "#/$defs/CustomGridCellSize"
-                }
-              ],
-              "default": {
-                "auto_scale_or_custom": "Auto-scale"
-              },
-              "title": "Grid Cell Size",
-              "ecoscope:advanced": true
-            },
-            "crs": {
-              "default": "EPSG:3857",
-              "title": "Coordinate Reference System",
-              "type": "string",
-              "description": "The coordinate reference system in which to perform the calculation, must be a valid CRS authority code, for example ESRI:53042",
-              "ecoscope:advanced": true
-            }
-          },
-          "type": "object",
-          "required": [],
           "title": ""
         }
       }
@@ -519,7 +149,7 @@
                 "max_x": 180.0
               },
               "title": "Bounding Box",
-              "description": "Only include patrol observations and events whose coordinates fall inside this bounding box. Applies to BOTH the patrol trajectories and the patrol events.",
+              "description": "Only include patrol observations whose coordinates fall inside this bounding box.",
               "ecoscope:advanced": true
             },
             "filter_point_coords": {
@@ -542,7 +172,7 @@
               },
               "title": "Filter Exact Point Coordinates",
               "type": "array",
-              "description": "Exclude observations and events recorded at these exact coordinates (e.g. known bad GPS fixes). Applies to BOTH the patrol trajectories and the patrol events.",
+              "description": "Exclude observations recorded at these exact coordinates (e.g. known bad GPS fixes).",
               "ecoscope:advanced": true
             },
             "trajectory_segment_filter": {
@@ -560,8 +190,52 @@
                 "max_speed_kmhr": 500
               },
               "title": "Trajectory Filter",
-              "description": "Drop trajectory segments outside these length / time / speed bounds (e.g. to remove implausible jumps). Applies to the patrol trajectories only.",
+              "description": "Drop trajectory segments outside these length / time / speed bounds (e.g. to remove implausible jumps).",
               "ecoscope:advanced": true
+            }
+          },
+          "type": "object",
+          "required": [],
+          "title": ""
+        }
+      }
+    },
+    "Group Data": {
+      "type": "object",
+      "description": "Configure how patrols are grouped (by category, temporal index or spatial feature group) and split into per-group dashboard views.",
+      "ecoscope:task_group": true,
+      "properties": {
+        "groupers": {
+          "additionalProperties": false,
+          "properties": {
+            "groupers": {
+              "default": null,
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ValueGrouper"
+                  },
+                  {
+                    "$ref": "#/$defs/TemporalGrouper"
+                  },
+                  {
+                    "$ref": "#/$defs/SpatialGrouper"
+                  }
+                ],
+                "title": "Group by"
+              },
+              "title": " ",
+              "type": "array",
+              "description": "",
+              "ecoscope:transform": [
+                {
+                  "transformer": "EarthRangerEnumResolver",
+                  "transformer_kws": {
+                    "type": "spatial_feature_group",
+                    "depends_on": "properties.er_client_name.properties.data_source.properties.name"
+                  }
+                }
+              ]
             }
           },
           "type": "object",
@@ -729,132 +403,6 @@
       "title": "TimezoneInfo",
       "type": "object"
     },
-    "SpatialGrouper": {
-      "properties": {
-        "spatial_index_name": {
-          "title": "Spatial Regions",
-          "type": "string"
-        }
-      },
-      "required": [
-        "spatial_index_name"
-      ],
-      "title": "Spatial",
-      "type": "object"
-    },
-    "TemporalGrouper": {
-      "properties": {
-        "temporal_index": {
-          "oneOf": [
-            {
-              "const": "%Y",
-              "title": "Year (example: 2024)"
-            },
-            {
-              "const": "%B",
-              "title": "Month (example: September)"
-            },
-            {
-              "const": "%Y-%m",
-              "title": "Year and Month (example: 2023-01)"
-            },
-            {
-              "const": "%j",
-              "title": "Day of the year as a number (example: 365)"
-            },
-            {
-              "const": "%d",
-              "title": "Day of the month as a number (example: 31)"
-            },
-            {
-              "const": "%A",
-              "title": "Day of the week (example: Sunday)"
-            },
-            {
-              "const": "%H",
-              "title": "Hour (24-hour clock) as number (example: 22)"
-            },
-            {
-              "const": "%Y-%m-%d",
-              "title": "Date (example: 2025-01-31)"
-            }
-          ],
-          "title": "Time",
-          "type": "string"
-        }
-      },
-      "required": [
-        "temporal_index"
-      ],
-      "title": "Time",
-      "type": "object"
-    },
-    "ValueGrouper": {
-      "title": "Category",
-      "type": "object",
-      "properties": {
-        "index_name": {
-          "title": "Index Name",
-          "type": "string",
-          "oneOf": [
-            {
-              "const": "patrol_serial_number",
-              "title": "Patrol Serial Number"
-            },
-            {
-              "const": "patrol_type__value",
-              "title": "Patrol Type"
-            },
-            {
-              "const": "patrol_subject",
-              "title": "Patrol Subject"
-            }
-          ]
-        }
-      }
-    },
-    "AutoScaleGridCellSize": {
-      "properties": {
-        "auto_scale_or_custom": {
-          "const": "Auto-scale",
-          "default": "Auto-scale",
-          "ecoscope:advanced": true,
-          "enum": [
-            "Auto-scale"
-          ],
-          "title": "Grid Cell Size",
-          "type": "string"
-        }
-      },
-      "title": "Auto-scale",
-      "type": "object"
-    },
-    "CustomGridCellSize": {
-      "properties": {
-        "auto_scale_or_custom": {
-          "const": "Customize",
-          "default": "Customize",
-          "ecoscope:advanced": true,
-          "enum": [
-            "Customize"
-          ],
-          "title": "Grid Cell Size",
-          "type": "string"
-        },
-        "grid_cell_size": {
-          "default": 5000,
-          "description": "Define the resolution of the raster grid (in the unit of measurement defined by the coordinate reference system set below). A smaller grid cell size provides more detail, while a larger size generalizes the data.",
-          "exclusiveMaximum": 10000,
-          "exclusiveMinimum": 0,
-          "gt": 0,
-          "lt": 10000,
-          "title": "Custom Grid Cell Size",
-          "type": "number"
-        }
-      },
-      "title": "Customize",
-      "type": "object"
-    },
     "BoundingBox": {
       "properties": {
         "min_y": {
@@ -952,6 +500,90 @@
       },
       "title": "TrajectorySegmentFilter",
       "type": "object"
+    },
+    "SpatialGrouper": {
+      "properties": {
+        "spatial_index_name": {
+          "title": "Spatial Regions",
+          "type": "string"
+        }
+      },
+      "required": [
+        "spatial_index_name"
+      ],
+      "title": "Spatial",
+      "type": "object"
+    },
+    "TemporalGrouper": {
+      "properties": {
+        "temporal_index": {
+          "oneOf": [
+            {
+              "const": "%Y",
+              "title": "Year (example: 2024)"
+            },
+            {
+              "const": "%B",
+              "title": "Month (example: September)"
+            },
+            {
+              "const": "%Y-%m",
+              "title": "Year and Month (example: 2023-01)"
+            },
+            {
+              "const": "%j",
+              "title": "Day of the year as a number (example: 365)"
+            },
+            {
+              "const": "%d",
+              "title": "Day of the month as a number (example: 31)"
+            },
+            {
+              "const": "%A",
+              "title": "Day of the week (example: Sunday)"
+            },
+            {
+              "const": "%H",
+              "title": "Hour (24-hour clock) as number (example: 22)"
+            },
+            {
+              "const": "%Y-%m-%d",
+              "title": "Date (example: 2025-01-31)"
+            }
+          ],
+          "title": "Time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "temporal_index"
+      ],
+      "title": "Time",
+      "type": "object"
+    },
+    "ValueGrouper": {
+      "title": "Category",
+      "type": "object",
+      "properties": {
+        "index_name": {
+          "title": "Index Name",
+          "type": "string",
+          "oneOf": [
+            {
+              "const": "patrol_serial_number",
+              "title": "Patrol Serial Number"
+            },
+            {
+              "const": "patrol_type__value",
+              "title": "Patrol Type"
+            },
+            {
+              "const": "patrol_subject",
+              "title": "Patrol Subject"
+            }
+          ]
+        }
+      }
     },
     "CustomMetric": {
       "dependencies": {
@@ -1260,65 +892,16 @@
         "timezone"
       ]
     },
-    "Patrol and Event Types": {
-      "er_patrol_and_events_params": {
+    "Patrol Types": {
+      "er_patrol_params": {
         "ui:order": [
           "patrol_types",
-          "event_types",
           "status",
           "patrols_overlap_daterange"
         ],
         "patrol_types": {
           "items": {
             "ui:help": "If you are on Ecoscope Desktop, \"Patrol Type\" values can be found in your EarthRanger Admin site under Activity \u2192 Patrol Types."
-          }
-        },
-        "event_types": {
-          "items": {
-            "ui:help": "If you are on Ecoscope Desktop, \"Event Type\" values can be found in your EarthRanger Admin site under Activity \u2192 Event Types."
-          }
-        }
-      }
-    },
-    "Patrols & Events Map": {
-      "ui:order": [
-        "set_traj_color_column",
-        "set_event_color_column"
-      ]
-    },
-    "Patrol & Event Density Map": {
-      "ui:order": [
-        "density_weighting",
-        "density_grid_options"
-      ],
-      "density_grid_options": {
-        "ui:order": [
-          "opacity",
-          "auto_scale_or_custom_cell_size",
-          "crs"
-        ],
-        "auto_scale_or_custom_cell_size": {
-          "anyOf": [
-            {
-              "ui:help": "Auto-scale for an optimized grid cell size based on the workflow data or Customize to set a specific grid cell size.",
-              "ui:options": {
-                "label": false
-              },
-              "auto_scale_or_custom": {
-                "ui:widget": "hidden"
-              }
-            },
-            {
-              "ui:options": {
-                "label": false
-              },
-              "auto_scale_or_custom": {
-                "ui:widget": "hidden"
-              }
-            }
-          ],
-          "auto_scale_or_custom": {
-            "ui:widget": "hidden"
           }
         }
       }
@@ -1413,23 +996,11 @@
       "workflow_details",
       "er_client_name",
       "time_range",
-      "Patrol and Event Types",
+      "Patrol Types",
       "Filter Data",
       "Group Data",
-      "Patrol Effort Summary",
-      "base_map_defs",
-      "Patrols & Events Map",
-      "Patrol & Event Density Map"
-    ],
-    "base_map_defs": {
-      "base_maps": {
-        "items": {
-          "ui:options": {
-            "label": false
-          }
-        }
-      }
-    }
+      "Patrol Effort Summary"
+    ]
   },
   "additionalProperties": false
 }
